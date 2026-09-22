@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#080816" />
+  <meta name="description" content="Rlx — portfolio de Mardochée Bossede. Développement, logiciels Windows, 3D, automatisation, vidéo, IA et expériences web." />
+  <title>Rlx — Mardochée Bossede | Dev · 3D · Automation · Digital</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2285%22>⚡</text></svg>">
+  <link rel="stylesheet" href="styles.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <canvas id="fx"></canvas>
+  <div class="cursor-glow" id="cursorGlow"></div>
+  <div class="noise"></div>
+
+  <header class="topbar glass">
+    <a class="brand" href="#top" aria-label="Accueil"><span class="brand-orb">R</span><span>RLX</span></a>
+    <nav>
+      <a href="#projects">Projets</a><a href="#services">Services</a><a href="#shop">Shop</a><a href="#skills">Stack</a><a href="#reviews">Avis</a>
+    </nav>
+    <a class="pill" href="mailto:bossedemardochee@gmail.com">Collaborer ↗</a>
+  </header>
+
+  <main id="top">
+    <section class="hero section">
+      <div class="hero-copy reveal">
+        <div class="eyebrow">MARDOCHEE BOSSEDE · PSEUDO RLX</div>
+        <h1>Je transforme des idées en <span>outils vivants.</span></h1>
+        <p class="lead">Développeur, gamer et créateur digital. Je conçois des logiciels Windows, expériences 3D, automatisations, outils IA, sites web, vidéos et produits numériques.</p>
+        <div class="hero-actions">
+          <a class="cta primary magnetic" href="#featured">Voir ScreenDrop</a>
+          <a class="cta ghost magnetic" href="#projects">Explorer mes projets</a>
+        </div>
+        <div class="microstats">
+          <div><b>3+ ans</b><span>expérience projets</span></div>
+          <div><b>Windows · Web · 3D</b><span>multi-domaines</span></div>
+          <div><b>Build → Ship</b><span>prototype jusqu'au produit</span></div>
+        </div>
+      </div>
+
+      <div class="hero-art reveal">
+        <div class="blister-card tilt">
+          <div class="blister-title">RLX CREATOR KIT</div>
+          <div class="avatar-box">
+            <div class="avatar-figure">
+              <div class="head"></div><div class="torso"></div><div class="arm a1"></div><div class="arm a2"></div><div class="leg l1"></div><div class="leg l2"></div>
+            </div>
+            <div class="orbit o1">&lt;/&gt;</div><div class="orbit o2">3D</div><div class="orbit o3">AI</div>
+          </div>
+          <div class="kit-grid">
+            <div class="kit-chip">C#</div><div class="kit-chip">JS</div><div class="kit-chip">SQL</div><div class="kit-chip">PS</div>
+          </div>
+          <div class="blister-footer">DEVELOPER · 3D · DIGITAL</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="featured" class="section featured reveal">
+      <div class="section-head"><span class="eyebrow">OUTIL VEDETTE</span><h2>ChatGPT ScreenDrop V5</h2></div>
+      <div class="product-stage glass">
+        <div class="screen-orb">
+          <div class="screen-inner"><span>⇧ K</span><small>CAPTURE → CHATGPT</small></div>
+        </div>
+        <div class="product-copy">
+          <p class="kicker">Windows · PowerShell 5.1 · sans dépendances externes</p>
+          <h3>Une capture d'écran, un raccourci, zéro détour.</h3>
+          <p>Appuie sur <b>Shift + K</b> : ScreenDrop capture le moniteur sous la souris, retrouve l'onglet ChatGPT utilisé récemment dans Chrome, colle l'image dans la conversation sans l'envoyer automatiquement, puis revient vers ta fenêtre de travail.</p>
+          <div class="feature-chips"><span>Multi-écran</span><span>Restauration fenêtre</span><span>Démarrage Windows</span><span>Journal diagnostic</span><span>Chrome UI Automation</span></div>
+          <div class="download-row">
+            <a class="cta primary" href="downloads/ChatGPT_ScreenDrop_ShiftK_V5.zip" download>Télécharger V5 (.zip)</a>
+            <button class="cta ghost" data-modal="screendrop-details">Détails techniques</button>
+          </div>
+          <div class="hash">SHA-256 : <code>fe5dec7933b2a9f0c1274f7e9285341ea00693e66677c0b25f07dddbdfd2532c</code></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="projects" class="section reveal">
+      <div class="section-head"><span class="eyebrow">LAB / PROJECTS</span><h2>Ce que je construis au quotidien</h2><p>Des outils métier aux environnements 3D temps réel, avec une approche très orientée prototype rapide, interaction et produit installable.</p></div>
+      <div class="project-grid">
+        <article class="project-card glass tilt"><span class="tag">ERP · WINDOWS</span><h3>BOCAR GESTION</h3><p>ERP local pour boutique, immobilier et chantiers : caisse, ventes, stock, dettes, cautions, commandes, historiques, sauvegardes et traçabilité.</p><div class="stack">C# · .NET · Windows</div></article>
+        <article class="project-card glass tilt"><span class="tag">E-COMMERCE</span><h3>Brazza Store</h3><p>Boutique web avec panier WhatsApp, profils clients, fidélité, catalogue, livraison locale et données connectées au cloud.</p><div class="stack">HTML · CSS · JS · Supabase · Netlify</div></article>
+        <article class="project-card glass tilt"><span class="tag">3D STUDIO</span><h3>RLX 3D Native Studio</h3><p>Éditeur 3D Windows : import FBX/GLB/OBJ, monde éditable, animations, caméra, éclairage, timeline, multi-acteurs, audio et export vidéo.</p><div class="stack">C# · .NET · PBR · 3D pipelines</div></article>
+        <article class="project-card glass tilt"><span class="tag">GAMEPLAY 3D</span><h3>Bank Drop / Money Rain</h3><p>Expérience de rebond et rythme : plateformes textuelles, gravité variable, segments, rails, figures, effets lumineux et timeline créative.</p><div class="stack">JavaScript · WebGL · Three.js</div></article>
+        <article class="project-card glass tilt"><span class="tag">GAME / ENGINE</span><h3>CodeRush</h3><p>Prototype de jeu 3D natif Windows avec launcher, mouvements, caméra, zones de jeu, véhicules et expérimentation moteur graphique.</p><div class="stack">C# · .NET · Windows</div></article>
+        <article class="project-card glass tilt"><span class="tag">AI WORKFLOW</span><h3>ScreenDrop Agent Workflow</h3><p>Workflow d'assistance IA sans clé API : capture, routage vers ChatGPT, automatisation locale et contrôle du contexte de travail.</p><div class="stack">PowerShell · Win32 · UI Automation</div></article>
+        <article class="project-card glass tilt"><span class="tag">WEB APP</span><h3>SkyCrash Live</h3><p>Prototype temps réel avec comptes, données cloud, outils d'administration, suivi d'activité et scénarios de démonstration de fiabilité.</p><div class="stack">JavaScript · Supabase · Realtime</div></article>
+        <article class="project-card glass tilt"><span class="tag">CREATOR TOOL</span><h3>Youmiee Studio Concepts</h3><p>Outils et concepts pour shorts : animation 3D, voix off IA, montage rythmé, transitions, hooks et expériences visuelles verticales.</p><div class="stack">AI · Motion · 3D · Video</div></article>
+      </div>
+    </section>
+
+    <section id="services" class="section split reveal">
+      <div class="section-head"><span class="eyebrow">SERVICES</span><h2>Je peux produire avec toi</h2></div>
+      <div class="service-cloud">
+        <span>Logiciels Windows</span><span>Applications web</span><span>Projets 3D</span><span>Lyrics videos</span><span>Vidéos YouTube</span><span>Voix off IA</span><span>Automatisations</span><span>E-commerce</span><span>Prototypes de jeux</span><span>Motion design</span><span>Interfaces UI/UX</span><span>Outils internes</span>
+      </div>
+    </section>
+
+    <section id="shop" class="section reveal">
+      <div class="section-head"><span class="eyebrow">RLX SHOP</span><h2>Produits numériques</h2><p>Les commandes sont enregistrées dans le cloud. Les passerelles de paiement réelles nécessitent ensuite les identifiants marchands du prestataire choisi.</p></div>
+      <div class="shop-grid">
+        <article class="shop-card glass"><div class="shop-visual blender">B</div><div><span class="tag">SOFTWARE</span><h3>BlenderFied</h3><p>Interface simplifiée pour créer et animer plus facilement qu'avec un workflow Blender classique.</p><div class="price">5 €</div><button class="cta primary buy" data-product="blenderfied" data-price="5">Acheter</button></div></article>
+        <article class="shop-card glass"><div class="shop-visual vb">V</div><div><span class="tag">GIFT CARD</span><h3>Carte cadeau V-Bucks</h3><p>Choisis une valeur et crée ta demande de commande.</p><div class="variants"><button class="variant active" data-price="5">5 €</button><button class="variant" data-price="10">10 €</button></div><button class="cta primary buy" data-product="vbucks" data-price="5">Commander</button></div></article>
+      </div>
+    </section>
+
+    <section id="skills" class="section reveal">
+      <div class="section-head"><span class="eyebrow">STACK</span><h2>Langages & outils déjà utilisés</h2></div>
+      <div class="skills-wrap glass">
+        <div class="skill-group"><h3>Langages</h3><div class="skill-pills"><span>HTML5</span><span>CSS3</span><span>JavaScript</span><span>TypeScript</span><span>C#</span><span>PowerShell</span><span>Batch</span><span>SQL</span><span>JSON</span></div></div>
+        <div class="skill-group"><h3>Plateformes / techno</h3><div class="skill-pills"><span>.NET</span><span>Windows</span><span>Supabase</span><span>PostgreSQL</span><span>Netlify</span><span>Git</span><span>GitHub</span><span>Three.js</span><span>WebGL</span><span>REST APIs</span><span>UI Automation</span></div></div>
+        <div class="skill-group"><h3>3D & création</h3><div class="skill-pills"><span>FBX</span><span>GLB / GLTF</span><span>OBJ</span><span>BVH</span><span>PBR</span><span>Animation</span><span>Timeline</span><span>Motion Design</span><span>AI media workflows</span></div></div>
+      </div>
+    </section>
+
+    <section class="section reveal">
+      <div class="section-head"><span class="eyebrow">PARCOURS</span><h2>Formation & diplômes</h2></div>
+      <div class="timeline glass">
+        <div><b>Parcours informatique — Epitech</b><span>Développement, projets logiciels et culture produit.</span></div>
+        <div><b>Baccalauréat Économie — TSECO</b><span>Formation économique et gestion.</span></div>
+        <div><b>Baccalauréat A4 — Espagnol</b><span>Formation littéraire et langues.</span></div>
+        <div><b>BEPC / DEF</b><span>Cycle secondaire.</span></div>
+        <div><b>CEP</b><span>Cycle primaire.</span></div>
+      </div>
+      <p class="small-note">Les certificats spécifiques peuvent être ajoutés ici dès qu'ils sont fournis en PDF ou image.</p>
+    </section>
+
+    <section id="reviews" class="section reveal">
+      <div class="section-head"><span class="eyebrow">COMMUNAUTÉ</span><h2>Avis utilisateurs</h2><p>Les avis sont envoyés au cloud puis publiés après validation.</p></div>
+      <div class="review-layout">
+        <form id="reviewForm" class="glass form-card">
+          <input name="display_name" placeholder="Ton nom / pseudo" minlength="2" maxlength="60" required>
+          <div class="stars" id="stars" aria-label="Note"><button type="button" data-star="1">★</button><button type="button" data-star="2">★</button><button type="button" data-star="3">★</button><button type="button" data-star="4">★</button><button type="button" data-star="5">★</button></div>
+          <input type="hidden" name="rating" value="5">
+          <textarea name="comment" placeholder="Ton avis..." minlength="2" maxlength="800" required></textarea>
+          <button class="cta primary" type="submit">Envoyer mon avis</button>
+          <p id="reviewStatus" class="form-status"></p>
+        </form>
+        <div id="reviewList" class="review-list"><div class="empty-state">Les avis validés apparaîtront ici.</div></div>
+      </div>
+    </section>
+
+    <section class="section final-cta reveal">
+      <div class="glass"><span class="eyebrow">COLLAB / FREELANCE / BUILD</span><h2>Tu as une idée à construire ?</h2><p>Parle-moi du problème, du produit ou du concept. Je peux partir d'un simple croquis et aller jusqu'au prototype fonctionnel.</p><a class="cta primary" href="mailto:bossedemardochee@gmail.com?subject=Collaboration%20avec%20Rlx">bossedemardochee@gmail.com ↗</a></div>
+    </section>
+  </main>
+
+  <footer><span>© 2026 Rlx / Mardochée Bossede</span><a href="admin.html">Admin</a><a href="mailto:bossedemardochee@gmail.com">Contact</a></footer>
+
+  <dialog id="screendrop-details" class="modal glass">
+    <button class="modal-close" aria-label="Fermer">×</button><h3>ScreenDrop V5 — fonctionnement</h3>
+    <ul><li>Raccourci global Shift + K.</li><li>Capture le moniteur situé sous le curseur.</li><li>Détecte le dernier onglet ChatGPT visité dans Chrome via UI Automation.</li><li>Colle l'image sans envoyer le message.</li><li>Préserve l'état de la fenêtre Chrome et revient vers l'application précédente.</li><li>Démarre automatiquement avec Windows et écrit un journal local de diagnostic.</li></ul>
+  </dialog>
+
+  <dialog id="checkoutModal" class="modal glass checkout-modal">
+    <button class="modal-close" aria-label="Fermer">×</button>
+    <h3>Créer une commande</h3>
+    <form id="checkoutForm">
+      <input type="hidden" name="product_slug"><input type="hidden" name="amount_eur">
+      <label>Produit<input name="product_label" readonly></label>
+      <label>Nom<input name="customer_name" required minlength="2"></label>
+      <label>Email<input type="email" name="email" placeholder="facultatif"></label>
+      <label>Téléphone<input name="phone" placeholder="facultatif"></label>
+      <label>Paiement<select name="payment_method" required><option>Visa / Mastercard</option><option>Airtel Money</option><option>MTN Mobile Money</option><option>Orange Money</option><option>Wave</option><option>Bitcoin</option></select></label>
+      <div class="payment-note">La commande est bien enregistrée, mais le débit réel ne peut être activé qu'après connexion d'un compte marchand / passerelle de paiement.</div>
+      <button class="cta primary" type="submit">Enregistrer la commande</button><p class="form-status" id="checkoutStatus"></p>
+    </form>
+  </dialog>
+</body>
+</html>
