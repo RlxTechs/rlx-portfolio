@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="theme-color" content="#080812">
+  <title>RLX Control Center</title>
+  <link rel="stylesheet" href="control.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="control.js"></script>
+</head>
+<body>
+  <div class="bg"></div>
+  <section id="loginView" class="login-shell">
+    <div class="login-card">
+      <div class="brand"><span>R</span><div><b>RLX Control Center</b><small>Espace privé</small></div></div>
+      <h1>Administration RLX</h1>
+      <p>Gère les avis, commandes, visites, messages, dons et journaux du site sans passer par le tableau Supabase.</p>
+      <label>Email<input id="email" type="email" autocomplete="username" value="bossedemardochee@gmail.com"></label>
+      <label>Mot de passe<input id="password" type="password" autocomplete="current-password" placeholder="••••••••"></label>
+      <div class="login-actions">
+        <button id="loginBtn" class="primary">Se connecter</button>
+        <button id="createBtn">Créer mon accès RLX</button>
+      </div>
+      <p class="hint">Première utilisation : choisis ton mot de passe puis clique « Créer mon accès RLX ». Si la confirmation email est activée, valide ensuite le message reçu.</p>
+      <p id="authStatus" class="status"></p>
+    </div>
+  </section>
+
+  <div id="appView" hidden>
+    <header class="topbar">
+      <div class="brand"><span>R</span><div><b>RLX Control</b><small id="sessionEmail">Connecté</small></div></div>
+      <div class="top-actions"><span id="syncState">Prêt</span><button id="refreshBtn">Actualiser</button><button id="logoutBtn">Déconnexion</button></div>
+    </header>
+    <div class="layout">
+      <aside class="sidebar">
+        <button class="nav active" data-tab="overview">Vue d'ensemble</button>
+        <button class="nav" data-tab="reviews">Avis <span id="pendingBadge"></span></button>
+        <button class="nav" data-tab="orders">Commandes</button>
+        <button class="nav" data-tab="visits">Visites</button>
+        <button class="nav" data-tab="messages">Messages</button>
+        <button class="nav" data-tab="donations">Dons</button>
+        <button class="nav" data-tab="downloads">Téléchargements</button>
+        <button class="nav" data-tab="audit">Journal</button>
+        <a class="back" href="index.html">← Voir le site public</a>
+      </aside>
+
+      <main class="content">
+        <section class="tab active" id="tab-overview">
+          <div class="heading"><div><span class="eyebrow">DASHBOARD</span><h1>Vue d'ensemble</h1></div><span id="lastRefresh"></span></div>
+          <div class="stats">
+            <article><span>Visites</span><b id="statVisits">—</b></article>
+            <article><span>Avis</span><b id="statReviews">—</b></article>
+            <article><span>À modérer</span><b id="statPending">—</b></article>
+            <article><span>Commandes</span><b id="statOrders">—</b></article>
+            <article><span>Messages</span><b id="statMessages">—</b></article>
+            <article><span>Dons</span><b id="statDonations">—</b></article>
+          </div>
+          <div class="panel"><h2>Activité récente</h2><div id="recentActivity" class="cards"></div></div>
+        </section>
+
+        <section class="tab" id="tab-reviews">
+          <div class="heading"><div><span class="eyebrow">COMMUNAUTÉ</span><h1>Avis</h1></div><input id="reviewSearch" class="search" placeholder="Rechercher..."></div>
+          <div id="reviewsList" class="cards"></div>
+        </section>
+
+        <section class="tab" id="tab-orders">
+          <div class="heading"><div><span class="eyebrow">SHOP</span><h1>Commandes</h1></div><input id="orderSearch" class="search" placeholder="Référence, nom, produit..."></div>
+          <div id="ordersList" class="cards"></div>
+        </section>
+
+        <section class="tab" id="tab-visits">
+          <div class="heading"><div><span class="eyebrow">ANALYTICS</span><h1>Visites</h1></div></div>
+          <div id="visitsList" class="table-wrap"></div>
+        </section>
+
+        <section class="tab" id="tab-messages">
+          <div class="heading"><div><span class="eyebrow">CONTACT</span><h1>Messages</h1></div></div>
+          <div id="messagesList" class="cards"></div>
+        </section>
+
+        <section class="tab" id="tab-donations">
+          <div class="heading"><div><span class="eyebrow">FUNDING</span><h1>Dons</h1></div></div>
+          <div id="donationsList" class="cards"></div>
+        </section>
+
+        <section class="tab" id="tab-downloads">
+          <div class="heading"><div><span class="eyebrow">ASSETS</span><h1>Téléchargements</h1></div></div>
+          <div id="downloadsList" class="table-wrap"></div>
+        </section>
+
+        <section class="tab" id="tab-audit">
+          <div class="heading"><div><span class="eyebrow">SECURITÉ</span><h1>Journal d'activité</h1></div></div>
+          <div id="auditList" class="table-wrap"></div>
+        </section>
+      </main>
+    </div>
+  </div>
+  <div id="toast" class="toast"></div>
+</body>
+</html>
