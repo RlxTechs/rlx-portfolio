@@ -68,7 +68,7 @@ function addPrimitive(type,pos=[0,.5,0],opts={}){
  if(type==='cylinder')o=new THREE.Mesh(new THREE.CylinderGeometry(.55,.55,1.4,32),basicMat(0xff8db0));
  if(type==='plane'){o=new THREE.Mesh(new THREE.PlaneGeometry(3,3),basicMat(0x626271));o.rotation.x=-Math.PI/2;o.position.y=.01}
  if(type==='light'){o=new THREE.PointLight(0xffffff,8,25);o.add(new THREE.Mesh(new THREE.SphereGeometry(.12,16,10),new THREE.MeshBasicMaterial({color:0xffe7a0})));pos=[2,3,2]}
- if(type==='spot'){o=new THREE.SpotLight(0xffffff,12,35,Math.PI/5,.35,1.2);o.target.position.set(0,0,0);o.add(o.target);pos=[3,5,3]}
+ if(type==='spot'){o=new THREE.SpotLight(0xffffff,12,35,Math.PI/5,.35,1.2);o.target.position.set(0,-1,0);o.add(o.target);pos=[3,5,3]}
  if(type==='camera')o=new THREE.PerspectiveCamera(45,16/9,.1,1000);
  if(type==='group')o=new THREE.Group();
  if(!o)return null;
@@ -150,7 +150,7 @@ function applyScenePreset(kind,noHistory=false){
   addPrimitive('cube',[0,.35,2],{noHistory:true});selected.scale.set(1.7,.7,1);selected.name='Table';
   addPrefab('lamp',[3,0,-2],{noHistory:true})
  }
- selected=null;transform.detach();refreshTree();syncInspector();focusScene();scheduleAutosave();toast('Scène '+kind+' chargée')
+ selected=null;transform.detach();refreshTree();syncInspector();syncWorldUI();focusScene();scheduleAutosave();toast('Scène '+kind+' chargée')
 }
 document.querySelectorAll('[data-scene]').forEach(b=>b.onclick=()=>applyScenePreset(b.dataset.scene));
 
@@ -254,7 +254,7 @@ async function importModel(file,opts={}){
  if(!opts.noHistory)checkpoint();const ext=(opts.name||file.name||'model.glb').split('.').pop().toLowerCase(),url=URL.createObjectURL(file);
  try{
   let o,clips=[];if(ext==='glb'||ext==='gltf'){const g=await new GLTFLoader().loadAsync(url);o=g.scene;clips=g.animations||[]}else if(ext==='fbx')o=await new FBXLoader().loadAsync(url);else if(ext==='obj')o=await new OBJLoader().loadAsync(url);else throw Error('Format non pris en charge');
-  const assetId=opts.assetId||await putAsset(file,opts.name||file.name);ensureMeta(o);o.name=(opts.name||file.name||'Modèle').replace(/\.[^.]+$/,'');o.userData.importAsset={id:assetId,name:opts.name||file.name};markShadows(o);scene.add(o);if(opts.transform)applyTransformData(o,opts.transform);if(clips.length)importedClips.set(o.userData.editorId,clips);if(opts.editorId)o.userData.editorId=opts.editorId;if(opts.keys)keyframes.set(o.userData.editorId,opts.keys);select(o);refreshTree();if(!opts.transform)focusSelected();scheduleAutosave();toast('Import '+(opts.name||file.name)+' réussi');return o
+  const assetId=opts.assetId||await putAsset(file,opts.name||file.name);ensureMeta(o);o.name=(opts.name||file.name||'Modèle').replace(/\.[^.]+$/,'');o.userData.importAsset={id:assetId,name:opts.name||file.name};markShadows(o);scene.add(o);if(opts.transform)applyTransformData(o,opts.transform);if(opts.editorId)o.userData.editorId=opts.editorId;if(clips.length)importedClips.set(o.userData.editorId,clips);if(opts.keys)keyframes.set(o.userData.editorId,opts.keys);select(o);refreshTree();if(!opts.transform)focusSelected();scheduleAutosave();toast('Import '+(opts.name||file.name)+' réussi');return o
  }catch(e){console.error(e);toast('Import impossible : '+e.message)}finally{URL.revokeObjectURL(url)}
 }
 
