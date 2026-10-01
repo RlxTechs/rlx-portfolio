@@ -42,6 +42,8 @@
         <button class="nav" data-tab="messages">Messages</button>
         <button class="nav" data-tab="donations">Dons</button>
         <button class="nav" data-tab="downloads">Téléchargements</button>
+        <button class="nav" data-tab="products">Produits <span id="productsBadge"></span></button>
+        <button class="nav" data-tab="erp">ERP State <span id="erpBadge"></span></button>
         <button class="nav" data-tab="audit">Journal</button>
         <a class="back" href="index.html">← Voir le site public</a>
       </aside>
@@ -56,6 +58,8 @@
             <article><span>Commandes</span><b id="statOrders">—</b></article>
             <article><span>Messages</span><b id="statMessages">—</b></article>
             <article><span>Dons</span><b id="statDonations">—</b></article>
+            <article><span>Produits</span><b id="statProducts">—</b></article>
+            <article><span>ERP State</span><b id="statErp">—</b></article>
           </div>
           <div class="panel"><h2>Activité récente</h2><div id="recentActivity" class="cards"></div></div>
         </section>
@@ -88,6 +92,44 @@
         <section class="tab" id="tab-downloads">
           <div class="heading"><div><span class="eyebrow">ASSETS</span><h1>Téléchargements</h1></div></div>
           <div id="downloadsList" class="table-wrap"></div>
+        </section>
+
+
+        <section class="tab" id="tab-products">
+          <div class="heading"><div><span class="eyebrow">CATALOGUE</span><h1>Produits</h1><p class="section-copy">Données JSON sécurisées par RLS. Seul ton compte admin RLX peut lire ou modifier ces lignes.</p></div><button id="newProductBtn" class="primary">+ Nouveau produit</button></div>
+          <div class="json-admin-grid">
+            <article class="json-editor panel">
+              <div class="editor-head"><div><span class="eyebrow">ÉDITEUR</span><h2 id="productEditorTitle">Nouveau produit</h2></div><button id="resetProductBtn">Réinitialiser</button></div>
+              <label>Identifiant<input id="productId" class="admin-input" placeholder="ex: blenderfied"></label>
+              <label>Données JSON<textarea id="productData" class="json-textarea" spellcheck="false">{
+  "name": "BlenderFied",
+  "price": 5,
+  "currency": "EUR",
+  "active": true
+}</textarea></label>
+              <div class="editor-actions"><button id="saveProductBtn" class="primary">Enregistrer</button><button id="deleteProductBtn" class="danger" disabled>Supprimer</button></div>
+              <p id="productEditorStatus" class="status"></p>
+            </article>
+            <div><div class="list-tools"><input id="productSearch" class="search" placeholder="Rechercher un produit..."><span id="productCountLabel" class="meta"></span></div><div id="productsList" class="cards"></div></div>
+          </div>
+        </section>
+
+        <section class="tab" id="tab-erp">
+          <div class="heading"><div><span class="eyebrow">APPLICATION STATE</span><h1>ERP State</h1><p class="section-copy">Stocke les états/sauvegardes JSON de tes outils ERP. Accès réservé à ton compte admin.</p></div><button id="newErpBtn" class="primary">+ Nouvel état</button></div>
+          <div class="json-admin-grid">
+            <article class="json-editor panel">
+              <div class="editor-head"><div><span class="eyebrow">ÉDITEUR</span><h2 id="erpEditorTitle">Nouvel état ERP</h2></div><button id="resetErpBtn">Réinitialiser</button></div>
+              <label>Identifiant<input id="erpId" class="admin-input" placeholder="ex: bocar-main-state"></label>
+              <label>Données JSON<textarea id="erpData" class="json-textarea" spellcheck="false">{
+  "version": 1,
+  "app": "BOCAR GESTION",
+  "state": {}
+}</textarea></label>
+              <div class="editor-actions"><button id="saveErpBtn" class="primary">Enregistrer</button><button id="deleteErpBtn" class="danger" disabled>Supprimer</button></div>
+              <p id="erpEditorStatus" class="status"></p>
+            </article>
+            <div><div class="list-tools"><input id="erpSearch" class="search" placeholder="Rechercher un état..."><span id="erpCountLabel" class="meta"></span></div><div id="erpList" class="cards"></div></div>
+          </div>
         </section>
 
         <section class="tab" id="tab-audit">
