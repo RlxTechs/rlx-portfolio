@@ -23,8 +23,22 @@
         <button id="loginBtn" class="primary">Se connecter</button>
         <button id="createBtn">Créer mon accès RLX</button>
       </div>
+      <button id="forgotPasswordBtn" class="text-button" type="button">Mot de passe oublié ?</button>
       <p class="hint">Première utilisation : choisis ton mot de passe puis clique « Créer mon accès RLX ». Si la confirmation email est activée, valide ensuite le message reçu.</p>
       <p id="authStatus" class="status"></p>
+    </div>
+  </section>
+
+  <section id="recoveryView" class="login-shell" hidden>
+    <div class="login-card">
+      <div class="brand"><span>R</span><div><b>RLX Control Center</b><small>Récupération sécurisée</small></div></div>
+      <h1>Nouveau mot de passe</h1>
+      <p>Choisis un nouveau mot de passe pour ton accès administrateur RLX.</p>
+      <label>Nouveau mot de passe<input id="newPassword" type="password" autocomplete="new-password" minlength="8" placeholder="8 caractères minimum"></label>
+      <label>Confirmer<input id="confirmNewPassword" type="password" autocomplete="new-password" minlength="8" placeholder="Répète le mot de passe"></label>
+      <button id="saveNewPasswordBtn" class="primary full-button">Enregistrer le nouveau mot de passe</button>
+      <button id="cancelRecoveryBtn" class="text-button" type="button">Retour à la connexion</button>
+      <p id="recoveryStatus" class="status"></p>
     </div>
   </section>
 
@@ -37,6 +51,7 @@
       <aside class="sidebar">
         <button class="nav active" data-tab="overview">Vue d'ensemble</button>
         <button class="nav" data-tab="analytics">Analytics</button>
+        <button class="nav" data-tab="account">Mon compte</button>
         <button class="nav" data-tab="reviews">Avis <span id="pendingBadge"></span></button>
         <button class="nav" data-tab="orders">Commandes</button>
         <button class="nav" data-tab="visits">Visites</button>
@@ -66,6 +81,25 @@
         </section>
 
         
+        <section class="tab" id="tab-account">
+          <div class="heading"><div><span class="eyebrow">SÉCURITÉ DU COMPTE</span><h1>Mon compte</h1><p class="section-copy">Gère ton mot de passe administrateur sans quitter RLX Control.</p></div><span id="cloudConnectionBadge" class="cloud-badge">Supabase connecté</span></div>
+          <div class="account-grid">
+            <article class="panel account-card">
+              <h2>Compte connecté</h2>
+              <label>Email<input id="accountEmail" class="admin-input" readonly></label>
+              <p class="meta">Cet email doit correspondre au compte administrateur autorisé par les règles RLS.</p>
+            </article>
+            <article class="panel account-card">
+              <h2>Changer le mot de passe</h2>
+              <label>Nouveau mot de passe<input id="accountNewPassword" class="admin-input" type="password" minlength="8" autocomplete="new-password"></label>
+              <label>Confirmer<input id="accountConfirmPassword" class="admin-input" type="password" minlength="8" autocomplete="new-password"></label>
+              <button id="changePasswordBtn" class="primary">Changer mon mot de passe</button>
+              <button id="sendResetFromAppBtn">M’envoyer un email de récupération</button>
+              <p id="accountPasswordStatus" class="status"></p>
+            </article>
+          </div>
+        </section>
+
         <section class="tab" id="tab-analytics">
           <div class="heading analytics-heading">
             <div><span class="eyebrow">PRIVATE ANALYTICS</span><h1>Analyse du trafic</h1><p class="section-copy">Pays, appareils, navigateurs, pages, téléchargements et sessions. Aucune IP brute n’est enregistrée.</p></div>
