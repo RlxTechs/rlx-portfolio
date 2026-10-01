@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="robots" content="noindex,nofollow,noarchive">
   <meta name="theme-color" content="#080812">
   <title>RLX Control Center</title>
@@ -14,11 +14,12 @@
 </head>
 <body>
   <div class="bg"></div>
+
   <section id="loginView" class="login-shell">
     <div class="login-card">
-      <div class="brand"><span>R</span><div><b>RLX Control Center</b><small>Espace privé</small></div></div>
+      <div class="brand"><span>R</span><div><b>RLX Control Center</b><small>Espace privé cloud</small></div></div>
       <h1>Administration RLX</h1>
-      <p>Gère les avis, commandes, visites, messages, dons et journaux du site sans passer par le tableau Supabase.</p>
+      <p>Connecté au cloud Supabase : avis, analytics, comptes, promotions, commandes, formations, LamarShop et contenus.</p>
       <label>Email<input id="email" type="email" autocomplete="username" value="bossedemardochee@gmail.com"></label>
       <label>Mot de passe<input id="password" type="password" autocomplete="current-password" placeholder="••••••••"></label>
       <div class="login-actions">
@@ -26,7 +27,7 @@
         <button id="createBtn">Créer mon accès RLX</button>
       </div>
       <button id="forgotPasswordBtn" class="text-button" type="button">Mot de passe oublié ?</button>
-      <p class="hint">Première utilisation : choisis ton mot de passe puis clique « Créer mon accès RLX ». Si la confirmation email est activée, valide ensuite le message reçu.</p>
+      <p class="hint">Première utilisation : crée ton accès RLX. Ensuite les données viennent directement de Supabase.</p>
       <p id="authStatus" class="status"></p>
     </div>
   </section>
@@ -36,10 +37,10 @@
       <div class="brand"><span>R</span><div><b>RLX Control Center</b><small>Récupération sécurisée</small></div></div>
       <h1>Nouveau mot de passe</h1>
       <p>Choisis un nouveau mot de passe pour ton accès administrateur RLX.</p>
-      <label>Nouveau mot de passe<input id="newPassword" type="password" autocomplete="new-password" minlength="8" placeholder="8 caractères minimum"></label>
-      <label>Confirmer<input id="confirmNewPassword" type="password" autocomplete="new-password" minlength="8" placeholder="Répète le mot de passe"></label>
-      <button id="saveNewPasswordBtn" class="primary full-button">Enregistrer le nouveau mot de passe</button>
-      <button id="cancelRecoveryBtn" class="text-button" type="button">Retour à la connexion</button>
+      <label>Nouveau mot de passe<input id="newPassword" type="password" autocomplete="new-password" minlength="8"></label>
+      <label>Confirmer<input id="confirmNewPassword" type="password" autocomplete="new-password" minlength="8"></label>
+      <button id="saveNewPasswordBtn" class="primary full-button">Enregistrer</button>
+      <button id="cancelRecoveryBtn" class="text-button" type="button">Retour</button>
       <p id="recoveryStatus" class="status"></p>
     </div>
   </section>
@@ -47,21 +48,21 @@
   <div id="appView" hidden>
     <header class="topbar">
       <div class="brand"><span>R</span><div><b>RLX Control</b><small id="sessionEmail">Connecté</small></div></div>
-      <div class="top-actions"><span id="syncState">Prêt</span><button id="installAppBtn" hidden>Installer l’app</button><button id="refreshBtn">Actualiser</button><button id="logoutBtn">Déconnexion</button></div>
+      <div class="top-actions"><span id="syncState">Prêt</span><button id="installAppBtn" hidden>Installer</button><button id="refreshBtn">Actualiser</button><button id="logoutBtn">Déconnexion</button></div>
     </header>
     <div class="layout">
       <aside class="sidebar">
         <button class="nav active" data-tab="overview">Vue d'ensemble</button>
         <button class="nav" data-tab="analytics">Analytics</button>
-        <button class="nav" data-tab="account">Mon compte</button>
+        <button class="nav" data-tab="users">Utilisateurs <span id="usersBadge"></span></button>
+        <button class="nav" data-tab="promos">Promotions <span id="promosBadge"></span></button>
+        <button class="nav" data-tab="content">Contenus</button>
         <button class="nav" data-tab="reviews">Avis <span id="pendingBadge"></span></button>
         <button class="nav" data-tab="orders">Commandes</button>
-        <button class="nav" data-tab="visits">Visites</button>
-        <button class="nav" data-tab="messages">Messages</button>
-        <button class="nav" data-tab="donations">Dons</button>
         <button class="nav" data-tab="downloads">Téléchargements</button>
         <button class="nav" data-tab="products">Produits <span id="productsBadge"></span></button>
         <button class="nav" data-tab="erp">ERP State <span id="erpBadge"></span></button>
+        <button class="nav" data-tab="account">Mon compte</button>
         <button class="nav" data-tab="audit">Journal</button>
         <a class="back" href="index.html">← Voir le site public</a>
       </aside>
@@ -70,134 +71,56 @@
         <section class="tab active" id="tab-overview">
           <div class="heading"><div><span class="eyebrow">DASHBOARD</span><h1>Vue d'ensemble</h1></div><span id="lastRefresh"></span></div>
           <div class="stats">
-            <article><span>Visites</span><b id="statVisits">—</b></article>
-            <article><span>Avis</span><b id="statReviews">—</b></article>
-            <article><span>À modérer</span><b id="statPending">—</b></article>
-            <article><span>Commandes</span><b id="statOrders">—</b></article>
-            <article><span>Messages</span><b id="statMessages">—</b></article>
-            <article><span>Dons</span><b id="statDonations">—</b></article>
-            <article><span>Produits</span><b id="statProducts">—</b></article>
-            <article><span>ERP State</span><b id="statErp">—</b></article>
+            <article><span>Visites</span><b id="statVisits">—</b></article><article><span>Avis</span><b id="statReviews">—</b></article><article><span>Utilisateurs</span><b id="statUsers">—</b></article><article><span>Opt-in promos</span><b id="statOptins">—</b></article><article><span>Commandes</span><b id="statOrders">—</b></article><article><span>Téléchargements</span><b id="statDownloads">—</b></article><article><span>Produits</span><b id="statProducts">—</b></article><article><span>ERP State</span><b id="statErp">—</b></article>
           </div>
           <div class="panel"><h2>Activité récente</h2><div id="recentActivity" class="cards"></div></div>
         </section>
 
-        
-        <section class="tab" id="tab-account">
-          <div class="heading"><div><span class="eyebrow">SÉCURITÉ DU COMPTE</span><h1>Mon compte</h1><p class="section-copy">Gère ton mot de passe administrateur sans quitter RLX Control.</p></div><span id="cloudConnectionBadge" class="cloud-badge">Supabase connecté</span></div>
-          <div class="account-grid">
-            <article class="panel account-card">
-              <h2>Compte connecté</h2>
-              <label>Email<input id="accountEmail" class="admin-input" readonly></label>
-              <p class="meta">Cet email doit correspondre au compte administrateur autorisé par les règles RLS.</p>
-            </article>
-            <article class="panel account-card">
-              <h2>Changer le mot de passe</h2>
-              <label>Nouveau mot de passe<input id="accountNewPassword" class="admin-input" type="password" minlength="8" autocomplete="new-password"></label>
-              <label>Confirmer<input id="accountConfirmPassword" class="admin-input" type="password" minlength="8" autocomplete="new-password"></label>
-              <button id="changePasswordBtn" class="primary">Changer mon mot de passe</button>
-              <button id="sendResetFromAppBtn">M’envoyer un email de récupération</button>
-              <p id="accountPasswordStatus" class="status"></p>
-            </article>
-          </div>
-        </section>
-
         <section class="tab" id="tab-analytics">
-          <div class="heading analytics-heading">
-            <div><span class="eyebrow">PRIVATE ANALYTICS</span><h1>Analyse du trafic</h1><p class="section-copy">Pays, appareils, navigateurs, pages, téléchargements et sessions. Aucune IP brute n’est enregistrée.</p></div>
-            <div class="analytics-actions"><select id="analyticsRange"><option value="1">24 h</option><option value="7" selected>7 jours</option><option value="30">30 jours</option><option value="all">Tout</option></select><button id="exportAnalyticsBtn">Exporter CSV</button></div>
-          </div>
-          <div class="analytics-stats">
-            <article><span>Pages vues</span><b id="aPageViews">—</b></article>
-            <article><span>Sessions uniques</span><b id="aSessions">—</b></article>
-            <article><span>Téléchargements</span><b id="aDownloads">—</b></article>
-            <article><span>Pays</span><b id="aCountries">—</b></article>
-            <article><span>Mobile</span><b id="aMobile">—</b></article>
-            <article><span>Interactions produit</span><b id="aProductClicks">—</b></article>
-          </div>
-          <div class="analytics-grid">
-            <article class="panel analytic-panel"><h2>Top pays</h2><div id="topCountries"></div></article>
-            <article class="panel analytic-panel"><h2>Appareils</h2><div id="topDevices"></div></article>
-            <article class="panel analytic-panel"><h2>Navigateurs</h2><div id="topBrowsers"></div></article>
-            <article class="panel analytic-panel"><h2>Systèmes</h2><div id="topOs"></div></article>
-            <article class="panel analytic-panel"><h2>Pages les plus vues</h2><div id="topPages"></div></article>
-            <article class="panel analytic-panel"><h2>Téléchargements</h2><div id="topDownloads"></div></article>
-          </div>
+          <div class="heading analytics-heading"><div><span class="eyebrow">PRIVATE ANALYTICS</span><h1>Analyse du trafic</h1><p class="section-copy">Pays, appareils, navigateurs, pages, téléchargements et sessions. Aucune IP brute n’est enregistrée.</p></div><div class="analytics-actions"><select id="analyticsRange"><option value="1">24 h</option><option value="7" selected>7 jours</option><option value="30">30 jours</option><option value="all">Tout</option></select><button id="exportAnalyticsBtn">Exporter CSV</button></div></div>
+          <div class="analytics-stats"><article><span>Pages vues</span><b id="aPageViews">—</b></article><article><span>Sessions</span><b id="aSessions">—</b></article><article><span>Téléchargements</span><b id="aDownloads">—</b></article><article><span>Pays</span><b id="aCountries">—</b></article><article><span>Mobile</span><b id="aMobile">—</b></article><article><span>Clics produits</span><b id="aProductClicks">—</b></article></div>
+          <div class="analytics-grid"><article class="panel analytic-panel"><h2>Top pays</h2><div id="topCountries"></div></article><article class="panel analytic-panel"><h2>Appareils</h2><div id="topDevices"></div></article><article class="panel analytic-panel"><h2>Navigateurs</h2><div id="topBrowsers"></div></article><article class="panel analytic-panel"><h2>Systèmes</h2><div id="topOs"></div></article><article class="panel analytic-panel"><h2>Pages</h2><div id="topPages"></div></article><article class="panel analytic-panel"><h2>Téléchargements</h2><div id="topDownloads"></div></article></div>
           <div class="panel"><div class="editor-head"><div><span class="eyebrow">LIVE / RECENT</span><h2>Derniers événements</h2></div><span id="analyticsCount" class="meta"></span></div><div id="analyticsRecent" class="table-wrap"></div></div>
         </section>
 
-        <section class="tab" id="tab-reviews">
-          <div class="heading"><div><span class="eyebrow">COMMUNAUTÉ</span><h1>Avis</h1></div><input id="reviewSearch" class="search" placeholder="Rechercher..."></div>
-          <div id="reviewsList" class="cards"></div>
+        <section class="tab" id="tab-users">
+          <div class="heading"><div><span class="eyebrow">COMPTES</span><h1>Utilisateurs RLX</h1><p class="section-copy">Comptes créés sur le site, opt-in marketing et dernières visites.</p></div><input id="userSearch" class="search" placeholder="Rechercher email, ville, pays..."></div>
+          <div id="usersList" class="cards"></div>
         </section>
 
-        <section class="tab" id="tab-orders">
-          <div class="heading"><div><span class="eyebrow">SHOP</span><h1>Commandes</h1></div><input id="orderSearch" class="search" placeholder="Référence, nom, produit..."></div>
-          <div id="ordersList" class="cards"></div>
-        </section>
-
-        <section class="tab" id="tab-visits">
-          <div class="heading"><div><span class="eyebrow">ANALYTICS</span><h1>Visites</h1></div></div>
-          <div id="visitsList" class="table-wrap"></div>
-        </section>
-
-        <section class="tab" id="tab-messages">
-          <div class="heading"><div><span class="eyebrow">CONTACT</span><h1>Messages</h1></div></div>
-          <div id="messagesList" class="cards"></div>
-        </section>
-
-        <section class="tab" id="tab-donations">
-          <div class="heading"><div><span class="eyebrow">FUNDING</span><h1>Dons</h1></div></div>
-          <div id="donationsList" class="cards"></div>
-        </section>
-
-        <section class="tab" id="tab-downloads">
-          <div class="heading"><div><span class="eyebrow">ASSETS</span><h1>Téléchargements</h1></div></div>
-          <div id="downloadsList" class="table-wrap"></div>
-        </section>
-
-
-        <section class="tab" id="tab-products">
-          <div class="heading"><div><span class="eyebrow">CATALOGUE</span><h1>Produits</h1><p class="section-copy">Données JSON sécurisées par RLS. Seul ton compte admin RLX peut lire ou modifier ces lignes.</p></div><button id="newProductBtn" class="primary">+ Nouveau produit</button></div>
+        <section class="tab" id="tab-promos">
+          <div class="heading"><div><span class="eyebrow">PROMOTIONS 18H</span><h1>Campagnes marketing</h1><p class="section-copy">Envois uniquement aux utilisateurs qui ont accepté les promos. L’envoi réel nécessite RESEND_API_KEY côté Supabase.</p></div><button id="runPromoBtn" class="primary">Lancer maintenant</button></div>
           <div class="json-admin-grid">
-            <article class="json-editor panel">
-              <div class="editor-head"><div><span class="eyebrow">ÉDITEUR</span><h2 id="productEditorTitle">Nouveau produit</h2></div><button id="resetProductBtn">Réinitialiser</button></div>
-              <label>Identifiant<input id="productId" class="admin-input" placeholder="ex: blenderfied"></label>
-              <label>Données JSON<textarea id="productData" class="json-textarea" spellcheck="false">{
+            <article class="json-editor panel"><div class="editor-head"><div><span class="eyebrow">ÉDITEUR</span><h2 id="promoEditorTitle">Nouvelle campagne</h2></div><button id="resetPromoBtn">Réinitialiser</button></div><input id="promoId" hidden><label>Titre<input id="promoTitle" class="admin-input" placeholder="Offre spéciale RLX"></label><label>Message<textarea id="promoMessage" class="json-textarea small-textarea" placeholder="Message de promotion..."></textarea></label><label>Bouton<input id="promoCtaLabel" class="admin-input" value="Voir l'offre"></label><label>URL<input id="promoCtaUrl" class="admin-input" value="https://rlx-kingdom.netlify.app/#lamarshop"></label><label>Segment<input id="promoSegment" class="admin-input" value="all"></label><label>Achat minimum €<input id="promoMin" class="admin-input" type="number" step="1" value="10"></label><label class="checkline"><input id="promoActive" type="checkbox" checked> Campagne active</label><div class="editor-actions"><button id="savePromoBtn" class="primary">Enregistrer</button><button id="deletePromoBtn" class="danger" disabled>Supprimer</button></div><p id="promoStatus" class="status"></p></article>
+            <div><div class="list-tools"><input id="promoSearch" class="search" placeholder="Rechercher campagne..."><span id="promoCountLabel" class="meta"></span></div><div id="promosList" class="cards"></div><div class="panel"><h2>Journal d’envoi</h2><div id="promoLog" class="table-wrap"></div></div></div>
+          </div>
+        </section>
+
+        <section class="tab" id="tab-content">
+          <div class="heading"><div><span class="eyebrow">CONTENU PUBLIC</span><h1>Formations · LamarShop · Vidéos</h1><p class="section-copy">Ces données alimentent le site officiel.</p></div></div>
+          <div class="content-grid"><article class="panel"><h2>Formations</h2><div id="coursesAdmin" class="cards"></div></article><article class="panel"><h2>LamarShop</h2><div id="lamarAdmin" class="cards"></div></article><article class="panel"><h2>Vidéos</h2><div id="videosAdmin" class="cards"></div></article></div>
+        </section>
+
+        <section class="tab" id="tab-reviews"><div class="heading"><div><span class="eyebrow">COMMUNAUTÉ</span><h1>Avis</h1></div><input id="reviewSearch" class="search" placeholder="Rechercher..."></div><div id="reviewsList" class="cards"></div></section>
+        <section class="tab" id="tab-orders"><div class="heading"><div><span class="eyebrow">SHOP</span><h1>Commandes</h1></div><input id="orderSearch" class="search" placeholder="Référence, nom, produit..."></div><div id="ordersList" class="cards"></div></section>
+        <section class="tab" id="tab-downloads"><div class="heading"><div><span class="eyebrow">ASSETS</span><h1>Téléchargements</h1></div></div><div id="downloadsList" class="table-wrap"></div></section>
+
+        <section class="tab" id="tab-products"><div class="heading"><div><span class="eyebrow">CATALOGUE</span><h1>Produits</h1><p class="section-copy">Données JSON sécurisées par RLS.</p></div><button id="newProductBtn" class="primary">+ Nouveau produit</button></div><div class="json-admin-grid"><article class="json-editor panel"><div class="editor-head"><div><span class="eyebrow">ÉDITEUR</span><h2 id="productEditorTitle">Nouveau produit</h2></div><button id="resetProductBtn">Réinitialiser</button></div><label>Identifiant<input id="productId" class="admin-input" placeholder="ex: blenderfied"></label><label>Données JSON<textarea id="productData" class="json-textarea" spellcheck="false">{
   "name": "BlenderFied",
   "price": 5,
   "currency": "EUR",
   "active": true
-}</textarea></label>
-              <div class="editor-actions"><button id="saveProductBtn" class="primary">Enregistrer</button><button id="deleteProductBtn" class="danger" disabled>Supprimer</button></div>
-              <p id="productEditorStatus" class="status"></p>
-            </article>
-            <div><div class="list-tools"><input id="productSearch" class="search" placeholder="Rechercher un produit..."><span id="productCountLabel" class="meta"></span></div><div id="productsList" class="cards"></div></div>
-          </div>
-        </section>
+}</textarea></label><div class="editor-actions"><button id="saveProductBtn" class="primary">Enregistrer</button><button id="deleteProductBtn" class="danger" disabled>Supprimer</button></div><p id="productEditorStatus" class="status"></p></article><div><div class="list-tools"><input id="productSearch" class="search" placeholder="Rechercher un produit..."><span id="productCountLabel" class="meta"></span></div><div id="productsList" class="cards"></div></div></div></section>
 
-        <section class="tab" id="tab-erp">
-          <div class="heading"><div><span class="eyebrow">APPLICATION STATE</span><h1>ERP State</h1><p class="section-copy">Stocke les états/sauvegardes JSON de tes outils ERP. Accès réservé à ton compte admin.</p></div><button id="newErpBtn" class="primary">+ Nouvel état</button></div>
-          <div class="json-admin-grid">
-            <article class="json-editor panel">
-              <div class="editor-head"><div><span class="eyebrow">ÉDITEUR</span><h2 id="erpEditorTitle">Nouvel état ERP</h2></div><button id="resetErpBtn">Réinitialiser</button></div>
-              <label>Identifiant<input id="erpId" class="admin-input" placeholder="ex: bocar-main-state"></label>
-              <label>Données JSON<textarea id="erpData" class="json-textarea" spellcheck="false">{
+        <section class="tab" id="tab-erp"><div class="heading"><div><span class="eyebrow">APPLICATION STATE</span><h1>ERP State</h1><p class="section-copy">États/sauvegardes JSON de tes outils ERP.</p></div><button id="newErpBtn" class="primary">+ Nouvel état</button></div><div class="json-admin-grid"><article class="json-editor panel"><div class="editor-head"><div><span class="eyebrow">ÉDITEUR</span><h2 id="erpEditorTitle">Nouvel état ERP</h2></div><button id="resetErpBtn">Réinitialiser</button></div><label>Identifiant<input id="erpId" class="admin-input" placeholder="ex: bocar-main-state"></label><label>Données JSON<textarea id="erpData" class="json-textarea" spellcheck="false">{
   "version": 1,
   "app": "BOCAR GESTION",
   "state": {}
-}</textarea></label>
-              <div class="editor-actions"><button id="saveErpBtn" class="primary">Enregistrer</button><button id="deleteErpBtn" class="danger" disabled>Supprimer</button></div>
-              <p id="erpEditorStatus" class="status"></p>
-            </article>
-            <div><div class="list-tools"><input id="erpSearch" class="search" placeholder="Rechercher un état..."><span id="erpCountLabel" class="meta"></span></div><div id="erpList" class="cards"></div></div>
-          </div>
-        </section>
+}</textarea></label><div class="editor-actions"><button id="saveErpBtn" class="primary">Enregistrer</button><button id="deleteErpBtn" class="danger" disabled>Supprimer</button></div><p id="erpEditorStatus" class="status"></p></article><div><div class="list-tools"><input id="erpSearch" class="search" placeholder="Rechercher un état..."><span id="erpCountLabel" class="meta"></span></div><div id="erpList" class="cards"></div></div></div></section>
 
-        <section class="tab" id="tab-audit">
-          <div class="heading"><div><span class="eyebrow">SECURITÉ</span><h1>Journal d'activité</h1></div></div>
-          <div id="auditList" class="table-wrap"></div>
-        </section>
+        <section class="tab" id="tab-account"><div class="heading"><div><span class="eyebrow">SÉCURITÉ DU COMPTE</span><h1>Mon compte</h1><p class="section-copy">Gère ton mot de passe administrateur.</p></div><span id="cloudConnectionBadge" class="cloud-badge">Supabase connecté</span></div><div class="account-grid"><article class="panel account-card"><h2>Compte connecté</h2><label>Email<input id="accountEmail" class="admin-input" readonly></label><p class="meta">Cet email doit correspondre au compte administrateur autorisé par les règles RLS.</p></article><article class="panel account-card"><h2>Changer le mot de passe</h2><label>Nouveau mot de passe<input id="accountNewPassword" class="admin-input" type="password" minlength="8" autocomplete="new-password"></label><label>Confirmer<input id="accountConfirmPassword" class="admin-input" type="password" minlength="8" autocomplete="new-password"></label><button id="changePasswordBtn" class="primary">Changer mon mot de passe</button><button id="sendResetFromAppBtn">M’envoyer un email de récupération</button><p id="accountPasswordStatus" class="status"></p></article></div></section>
+
+        <section class="tab" id="tab-audit"><div class="heading"><div><span class="eyebrow">SECURITÉ</span><h1>Journal d'activité</h1></div></div><div id="auditList" class="table-wrap"></div></section>
       </main>
     </div>
   </div>
