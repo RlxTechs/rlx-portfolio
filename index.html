@@ -7,9 +7,9 @@
   <meta name="description" content="Rlx — portfolio de Mardochée Bossede. Développement, logiciels Windows, 3D, automatisation, vidéo, IA et expériences web." />
   <title>Rlx — Mardochée Bossede | Dev · 3D · Automation · Digital</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2285%22>⚡</text></svg>">
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css" />\n  <link rel="stylesheet" href="creator-kit.css" />
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script defer src="app.js"></script>
+  <script defer src="app.js"></script>\n  <script type="module" src="creator-kit.js"></script>
 </head>
 <body>
   <canvas id="fx"></canvas>
@@ -42,18 +42,26 @@
       </div>
 
       <div class="hero-art reveal">
-        <div class="blister-card tilt">
+        <div class="blister-card creator-card">
           <div class="blister-title">RLX CREATOR KIT</div>
-          <div class="avatar-box">
-            <div class="avatar-figure">
-              <div class="head"></div><div class="torso"></div><div class="arm a1"></div><div class="arm a2"></div><div class="leg l1"></div><div class="leg l2"></div>
+          <div class="creator-viewer-shell" id="creatorDrop">
+            <div id="creatorViewer" class="creator-viewer"></div>
+            <div id="creatorEmpty" class="creator-empty">
+              <b>Ton skin 3D ici</b>
+              <span>GLB / GLTF riggé</span>
             </div>
-            <div class="orbit o1">&lt;/&gt;</div><div class="orbit o2">3D</div><div class="orbit o3">AI</div>
+            <div class="creator-badge" id="creatorAnimStatus">Aucun skin chargé</div>
           </div>
+          <div class="creator-actions">
+            <label class="creator-upload">Charger un skin<input id="creatorSkinInput" type="file" accept=".glb,.gltf,model/gltf-binary,model/gltf+json" hidden></label>
+            <button type="button" id="creatorNextAnim">Animation suivante</button>
+            <button type="button" id="creatorResetView">Recentrer</button>
+          </div>
+          <p class="creator-note">Le skin choisi reste enregistré dans ce navigateur. Les clips intégrés jouent automatiquement au hasard ; si le GLB n'en contient pas, le rig reçoit des mouvements procéduraux.</p>
           <div class="kit-grid">
-            <div class="kit-chip">C#</div><div class="kit-chip">JS</div><div class="kit-chip">SQL</div><div class="kit-chip">PS</div>
+            <div class="kit-chip">3D</div><div class="kit-chip">RIG</div><div class="kit-chip">ANIM</div><div class="kit-chip">GLB</div>
           </div>
-          <div class="blister-footer">DEVELOPER · 3D · DIGITAL</div>
+          <div class="blister-footer">CREATOR · RIG · ANIMATION</div>
         </div>
       </div>
     </section>
@@ -148,7 +156,7 @@
     </section>
   </main>
 
-  <footer><span>© 2026 Rlx / Mardochée Bossede</span><a href="admin.html">Admin</a><a href="mailto:bossedemardochee@gmail.com">Contact</a></footer>
+  <footer><span>© 2026 Rlx / Mardochée Bossede</span><a href="mailto:bossedemardochee@gmail.com">Contact</a></footer>
 
   <dialog id="screendrop-details" class="modal glass">
     <button class="modal-close" aria-label="Fermer">×</button><h3>ScreenDrop V5 — fonctionnement</h3>
