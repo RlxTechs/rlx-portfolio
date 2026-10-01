@@ -15,8 +15,48 @@ document.querySelectorAll('.tilt').forEach(card=>{card.addEventListener('pointer
 
 document.querySelectorAll('[data-modal]').forEach(b=>b.onclick=()=>document.getElementById(b.dataset.modal).showModal());document.querySelectorAll('.modal-close').forEach(b=>b.onclick=()=>b.closest('dialog').close());
 
-// Supabase analytics: anonymous session only, no fingerprinting.
-(async()=>{if(!sb)return;let sid=localStorage.getItem('rlx_sid');if(!sid){sid=crypto.randomUUID();localStorage.setItem('rlx_sid',sid)}try{await sb.from('site_visits').insert({session_id:sid,path:location.pathname,referrer:document.referrer||null,locale:navigator.language||null,screen_width:screen.width})}catch{}})();
+// Private analytics via Netlify Edge: no raw IP is stored.
+let rlxSessionId=localStorage.getItem('rlx_sid');
+if(!rlxSessionId){rlxSessionId=crypto.randomUUID();localStorage.setItem('rlx_sid',rlxSessionId)}
+function analyticsPayload(event_type,extra={}){
+  let timezone=null;
+  try{timezone=Intl.DateTimeFormat().resolvedOptions().timeZone||null}catch{}
+  return {
+    event_type,
+    session_id:rlxSessionId,
+    path:location.pathname+location.search,
+    page_title:document.title,
+    referrer:document.referrer||null,
+    locale:navigator.language||null,
+    timezone,
+    screen_width:screen.width||null,
+    screen_height:screen.height||null,
+    viewport_width:innerWidth||null,
+    viewport_height:innerHeight||null,
+    platform:navigator.userAgentData?.platform||navigator.platform||null,
+    ...extra
+  }
+}
+async function trackAnalytics(event_type,extra={}){
+  try{
+    await fetch('/api/analytics',{method:'POST',headers:{'Content-Type':'application/json'},keepalive:true,body:JSON.stringify(analyticsPayload(event_type,extra))})
+  }catch{}
+}
+trackAnalytics('page_view');
+
+document.addEventListener('click',e=>{
+  const a=e.target.closest('a[href]');
+  if(a){
+    const href=a.getAttribute('href')||'';
+    if(a.hasAttribute('download')||/\/downloads\//i.test(href)){
+      const slug=(href.split('/').pop()||'download').split('?')[0];
+      trackAnalytics('download',{asset_slug:slug,metadata:{href}})
+    }
+    if(/blenderfied/i.test(href)) trackAnalytics('tool_open',{asset_slug:'blenderfied'});
+  }
+  const buy=e.target.closest('.buy');
+  if(buy) trackAnalytics('product_click',{asset_slug:buy.dataset.product||null,metadata:{price:Number(buy.dataset.price||0)}})
+});
 
 // Reviews
 let rating=5;const starButtons=[...document.querySelectorAll('#stars button')];function paintStars(){starButtons.forEach((b,i)=>b.classList.toggle('active',i<rating))}paintStars();starButtons.forEach(b=>b.onclick=()=>{rating=+b.dataset.star;document.querySelector('[name=rating]').value=rating;paintStars()});
