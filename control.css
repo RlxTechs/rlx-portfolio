@@ -32,3 +32,12 @@ button:disabled{opacity:.42;cursor:not-allowed}
 .cloud-badge{display:inline-flex;align-items:center;gap:7px;border:1px solid #356346;background:#14251a;color:#aef5c5;border-radius:999px;padding:8px 12px;font-size:12px}
 .cloud-badge:before{content:"";width:7px;height:7px;border-radius:50%;background:#55d98a;box-shadow:0 0 10px #55d98a}
 @media(max-width:800px){.account-grid{grid-template-columns:1fr}}
+
+.small-textarea{min-height:170px}
+.content-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.mini-card{border:1px solid var(--line);background:#0d0d17;border-radius:12px;padding:12px;display:grid;gap:7px;margin-bottom:8px}
+.mini-card b{font-size:13px}.mini-card span,.mini-card small{color:var(--muted);font-size:11px;line-height:1.4}.mini-card button{justify-self:start}
+.checkline{display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:9px!important}.checkline input{width:auto!important}
+.user-card-grid{display:grid;grid-template-columns:1.2fr .8fr .8fr;gap:10px}
+.user-card-grid .meta{white-space:normal}
+@media(max-width:1050px){.content-grid{grid-template-columns:1fr}.user-card-grid{grid-template-columns:1fr}}
