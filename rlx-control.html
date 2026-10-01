@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex,nofollow,noarchive">
   <meta name="theme-color" content="#080812">
   <title>RLX Control Center</title>
-  <link rel="stylesheet" href="control.css">
+  <link rel="manifest" href="manifest.webmanifest">\n  <link rel="icon" href="rlx-control-icon.svg" type="image/svg+xml">\n  <link rel="stylesheet" href="control.css">
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script defer src="control.js"></script>
 </head>
@@ -31,11 +31,12 @@
   <div id="appView" hidden>
     <header class="topbar">
       <div class="brand"><span>R</span><div><b>RLX Control</b><small id="sessionEmail">Connecté</small></div></div>
-      <div class="top-actions"><span id="syncState">Prêt</span><button id="refreshBtn">Actualiser</button><button id="logoutBtn">Déconnexion</button></div>
+      <div class="top-actions"><span id="syncState">Prêt</span><button id="installAppBtn" hidden>Installer l’app</button><button id="refreshBtn">Actualiser</button><button id="logoutBtn">Déconnexion</button></div>
     </header>
     <div class="layout">
       <aside class="sidebar">
         <button class="nav active" data-tab="overview">Vue d'ensemble</button>
+        <button class="nav" data-tab="analytics">Analytics</button>
         <button class="nav" data-tab="reviews">Avis <span id="pendingBadge"></span></button>
         <button class="nav" data-tab="orders">Commandes</button>
         <button class="nav" data-tab="visits">Visites</button>
@@ -64,7 +65,31 @@
           <div class="panel"><h2>Activité récente</h2><div id="recentActivity" class="cards"></div></div>
         </section>
 
-        <section class="tab" id="tab-reviews">
+        
+        <section class="tab" id="tab-analytics">
+          <div class="heading analytics-heading">
+            <div><span class="eyebrow">PRIVATE ANALYTICS</span><h1>Analyse du trafic</h1><p class="section-copy">Pays, appareils, navigateurs, pages, téléchargements et sessions. Aucune IP brute n’est enregistrée.</p></div>
+            <div class="analytics-actions"><select id="analyticsRange"><option value="1">24 h</option><option value="7" selected>7 jours</option><option value="30">30 jours</option><option value="all">Tout</option></select><button id="exportAnalyticsBtn">Exporter CSV</button></div>
+          </div>
+          <div class="analytics-stats">
+            <article><span>Pages vues</span><b id="aPageViews">—</b></article>
+            <article><span>Sessions uniques</span><b id="aSessions">—</b></article>
+            <article><span>Téléchargements</span><b id="aDownloads">—</b></article>
+            <article><span>Pays</span><b id="aCountries">—</b></article>
+            <article><span>Mobile</span><b id="aMobile">—</b></article>
+            <article><span>Interactions produit</span><b id="aProductClicks">—</b></article>
+          </div>
+          <div class="analytics-grid">
+            <article class="panel analytic-panel"><h2>Top pays</h2><div id="topCountries"></div></article>
+            <article class="panel analytic-panel"><h2>Appareils</h2><div id="topDevices"></div></article>
+            <article class="panel analytic-panel"><h2>Navigateurs</h2><div id="topBrowsers"></div></article>
+            <article class="panel analytic-panel"><h2>Systèmes</h2><div id="topOs"></div></article>
+            <article class="panel analytic-panel"><h2>Pages les plus vues</h2><div id="topPages"></div></article>
+            <article class="panel analytic-panel"><h2>Téléchargements</h2><div id="topDownloads"></div></article>
+          </div>
+          <div class="panel"><div class="editor-head"><div><span class="eyebrow">LIVE / RECENT</span><h2>Derniers événements</h2></div><span id="analyticsCount" class="meta"></span></div><div id="analyticsRecent" class="table-wrap"></div></div>
+        </section>
+\n        <section class="tab" id="tab-reviews">
           <div class="heading"><div><span class="eyebrow">COMMUNAUTÉ</span><h1>Avis</h1></div><input id="reviewSearch" class="search" placeholder="Rechercher..."></div>
           <div id="reviewsList" class="cards"></div>
         </section>
