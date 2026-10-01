@@ -1,72 +1,53 @@
 const SUPABASE_URL='https://uwfyfuoiksjgyxoovxfn.supabase.co';
 const SUPABASE_KEY='sb_publishable_f4RpmT2AsQToBtiBiI6hBg_kqSZbwCj';
 const sb=window.supabase?.createClient(SUPABASE_URL,SUPABASE_KEY);
+const $=id=>document.getElementById(id);
+const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 
-// Ambient particle canvas
-const canvas=document.getElementById('fx'),ctx=canvas.getContext('2d');let pts=[];
-function resize(){canvas.width=innerWidth*devicePixelRatio;canvas.height=innerHeight*devicePixelRatio;canvas.style.width=innerWidth+'px';canvas.style.height=innerHeight+'px';ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);pts=Array.from({length:Math.min(95,Math.floor(innerWidth/13))},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.6+.2,v:(Math.random()*.25+.08)}))}resize();addEventListener('resize',resize);
-function draw(){ctx.clearRect(0,0,innerWidth,innerHeight);for(const p of pts){p.y-=p.v;if(p.y<0){p.y=innerHeight;p.x=Math.random()*innerWidth}ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle='rgba(190,150,255,.32)';ctx.fill()}requestAnimationFrame(draw)}draw();
-
-const glow=document.getElementById('cursorGlow');addEventListener('pointermove',e=>{glow.style.left=e.clientX+'px';glow.style.top=e.clientY+'px'});
+// Ambient particles
+const canvas=$('fx'),ctx=canvas?.getContext('2d');let pts=[];
+function resizeFx(){if(!canvas||!ctx)return;canvas.width=innerWidth*devicePixelRatio;canvas.height=innerHeight*devicePixelRatio;canvas.style.width=innerWidth+'px';canvas.style.height=innerHeight+'px';ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);pts=Array.from({length:Math.min(70,Math.floor(innerWidth/16))},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.4+.2,v:(Math.random()*.22+.07)}))}resizeFx();addEventListener('resize',resizeFx);
+function drawFx(){if(!ctx)return;ctx.clearRect(0,0,innerWidth,innerHeight);for(const p of pts){p.y-=p.v;if(p.y<0){p.y=innerHeight;p.x=Math.random()*innerWidth}ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle='rgba(190,150,255,.30)';ctx.fill()}requestAnimationFrame(drawFx)}drawFx();
 
 const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')}),{threshold:.12});document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+$('menuBtn')?.addEventListener('click',()=>$('mainNav')?.classList.toggle('open'));
+document.querySelectorAll('#mainNav a').forEach(a=>a.addEventListener('click',()=>$('mainNav')?.classList.remove('open')));
 
-document.querySelectorAll('.tilt').forEach(card=>{card.addEventListener('pointermove',e=>{const r=card.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;card.style.transform=`perspective(900px) rotateX(${-y*7}deg) rotateY(${x*8}deg) translateY(-3px)`});card.addEventListener('pointerleave',()=>card.style.transform='')});
-
-document.querySelectorAll('[data-modal]').forEach(b=>b.onclick=()=>document.getElementById(b.dataset.modal).showModal());document.querySelectorAll('.modal-close').forEach(b=>b.onclick=()=>b.closest('dialog').close());
-
-// Private analytics via Netlify Edge: no raw IP is stored.
-let rlxSessionId=localStorage.getItem('rlx_sid');
-if(!rlxSessionId){rlxSessionId=crypto.randomUUID();localStorage.setItem('rlx_sid',rlxSessionId)}
-function analyticsPayload(event_type,extra={}){
-  let timezone=null;
-  try{timezone=Intl.DateTimeFormat().resolvedOptions().timeZone||null}catch{}
-  return {
-    event_type,
-    session_id:rlxSessionId,
-    path:location.pathname+location.search,
-    page_title:document.title,
-    referrer:document.referrer||null,
-    locale:navigator.language||null,
-    timezone,
-    screen_width:screen.width||null,
-    screen_height:screen.height||null,
-    viewport_width:innerWidth||null,
-    viewport_height:innerHeight||null,
-    platform:navigator.userAgentData?.platform||navigator.platform||null,
-    ...extra
-  }
-}
-async function trackAnalytics(event_type,extra={}){
-  try{
-    await fetch('/api/analytics',{method:'POST',headers:{'Content-Type':'application/json'},keepalive:true,body:JSON.stringify(analyticsPayload(event_type,extra))})
-  }catch{}
-}
+let rlxSessionId=localStorage.getItem('rlx_sid');if(!rlxSessionId){rlxSessionId=crypto.randomUUID();localStorage.setItem('rlx_sid',rlxSessionId)}
+function analyticsPayload(event_type,extra={}){let timezone=null;try{timezone=Intl.DateTimeFormat().resolvedOptions().timeZone||null}catch{}return{event_type,session_id:rlxSessionId,path:location.pathname+location.search,page_title:document.title,referrer:document.referrer||null,locale:navigator.language||null,timezone,screen_width:screen.width||null,screen_height:screen.height||null,viewport_width:innerWidth||null,viewport_height:innerHeight||null,platform:navigator.userAgentData?.platform||navigator.platform||null,...extra}}
+async function trackAnalytics(event_type,extra={}){try{await fetch('/api/analytics',{method:'POST',headers:{'Content-Type':'application/json'},keepalive:true,body:JSON.stringify(analyticsPayload(event_type,extra))})}catch{}}
 trackAnalytics('page_view');
 
-document.addEventListener('click',e=>{
-  const a=e.target.closest('a[href]');
-  if(a){
-    const href=a.getAttribute('href')||'';
-    if(a.hasAttribute('download')||/\/downloads\//i.test(href)){
-      const slug=(href.split('/').pop()||'download').split('?')[0];
-      trackAnalytics('download',{asset_slug:slug,metadata:{href}})
-    }
-    if(/blenderfied/i.test(href)) trackAnalytics('tool_open',{asset_slug:'blenderfied'});
-  }
-  const buy=e.target.closest('.buy');
-  if(buy) trackAnalytics('product_click',{asset_slug:buy.dataset.product||null,metadata:{price:Number(buy.dataset.price||0)}})
-});
+document.addEventListener('click',e=>{const a=e.target.closest('a[href]');if(a){const href=a.getAttribute('href')||'';if(a.hasAttribute('download')||/\/downloads\//i.test(href)){trackAnalytics('download',{asset_slug:(href.split('/').pop()||'download').split('?')[0],metadata:{href}})}if(/blenderfied/i.test(href))trackAnalytics('tool_open',{asset_slug:'blenderfied'})}const buy=e.target.closest('.buy');if(buy)trackAnalytics('product_click',{asset_slug:buy.dataset.product||null,metadata:{price:Number(buy.dataset.price||0)}})});
+
+// Auth / account
+let currentUser=null;
+async function getUser(){if(!sb)return null;const {data:{user}}=await sb.auth.getUser();currentUser=user;return user}
+function accountHtml(user){if(user){return `<div class="profile-chip"><div><b>${esc(user.email||'Compte RLX')}</b><p class="form-status">Connecté. Tu peux gérer tes offres et recevoir les promos seulement si tu acceptes.</p></div><button class="cta ghost" id="logoutPublic">Déconnexion</button></div><label class="checkbox-row"><input type="checkbox" id="marketingOpt"><span>Je veux recevoir les promotions RLX toutes les 18h environ : formations, LamarShop, logiciels, cartes cadeaux et opportunités.</span></label><button class="cta primary" id="savePrefs">Enregistrer mes préférences</button><p id="authMsg" class="form-status"></p>`}
+return `<div class="auth-card"><div class="row"><input id="authEmail" type="email" placeholder="tonemail@gmail.com"><button class="cta primary" id="sendOtp">Recevoir le code</button></div><div class="row"><input id="authCode" placeholder="Code email si Supabase l’envoie"><button class="cta ghost" id="verifyOtp">Valider</button></div><button class="cta ghost" id="googleLogin">Continuer avec Google</button><label class="checkbox-row"><input type="checkbox" id="marketingSignup"><span>J’accepte de recevoir les promos RLX. Je peux me désabonner depuis mon compte.</span></label><p id="authMsg" class="form-status"></p></div>`}
+async function renderAccount(){const user=await getUser();$('accountPanel').innerHTML=accountHtml(user);$('accountTitle').textContent=user?'Bienvenue dans ton compte RLX':'Connecte-toi à RLX';if(user){const {data:prefs}=await sb.from('marketing_preferences').select('*').eq('user_id',user.id).maybeSingle();$('marketingOpt').checked=!!prefs?.opt_in;$('logoutPublic').onclick=async()=>{await sb.auth.signOut();renderAccount()};$('savePrefs').onclick=saveMarketingPrefs}else{$('sendOtp').onclick=sendOtp;$('verifyOtp').onclick=verifyOtp;$('googleLogin').onclick=googleLogin}}
+async function sendOtp(){const email=$('authEmail').value.trim();if(!email)return $('authMsg').textContent='Entre ton email.';const optIn=$('marketingSignup')?.checked||false;$('authMsg').textContent='Envoi du code/lien...';const {error}=await sb.auth.signInWithOtp({email,options:{shouldCreateUser:true,emailRedirectTo:location.origin+location.pathname,data:{marketing_opt_in:optIn}}});$('authMsg').textContent=error?error.message:'Code ou lien envoyé. Vérifie ta boîte Gmail / spam.'}
+async function verifyOtp(){const email=$('authEmail').value.trim(),token=$('authCode').value.trim();if(!email||!token)return $('authMsg').textContent='Entre email + code.';const {error}=await sb.auth.verifyOtp({email,token,type:'email'});$('authMsg').textContent=error?error.message:'Connecté.';if(!error){await afterLogin();renderAccount()}}
+async function googleLogin(){const {error}=await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+location.pathname}});if(error)$('authMsg').textContent=error.message||'Google OAuth doit être activé dans Supabase.'}
+async function afterLogin(){const user=await getUser();if(!user)return;const optIn=$('marketingSignup')?.checked||false;await sb.from('user_profiles').upsert({id:user.id,email:user.email,full_name:user.user_metadata?.full_name||user.user_metadata?.name||null,avatar_url:user.user_metadata?.avatar_url||null,marketing_opt_in:optIn,marketing_opt_in_at:optIn?new Date().toISOString():null,last_seen_at:new Date().toISOString(),updated_at:new Date().toISOString()});if(optIn)await sb.from('marketing_preferences').upsert({user_id:user.id,email:user.email,opt_in:true,cadence_hours:18,updated_at:new Date().toISOString()})}
+async function saveMarketingPrefs(){const user=await getUser();if(!user)return;const opt=$('marketingOpt').checked;await sb.from('user_profiles').update({marketing_opt_in:opt,marketing_opt_in_at:opt?new Date().toISOString():null,updated_at:new Date().toISOString()}).eq('id',user.id);await sb.from('marketing_preferences').upsert({user_id:user.id,email:user.email,opt_in:opt,cadence_hours:18,unsubscribed_at:opt?null:new Date().toISOString(),updated_at:new Date().toISOString()});$('authMsg').textContent=opt?'Promos activées.':'Promos désactivées.'}
+$('accountBtn')?.addEventListener('click',()=>document.querySelector('#account')?.scrollIntoView({behavior:'smooth'}));['heroLoginBtn','giftLoginBtn','contestLoginBtn'].forEach(id=>$(id)?.addEventListener('click',()=>document.querySelector('#account')?.scrollIntoView({behavior:'smooth'})));
+sb?.auth.onAuthStateChange(async()=>{await afterLogin();renderAccount()});renderAccount();
+
+// Dynamic content
+async function loadCourses(){if(!sb)return;const {data}=await sb.from('training_courses').select('*').eq('active',true).order('price_eur');$('coursesGrid').innerHTML=(data||[]).map(c=>{const theme=c.visual_theme||{},mods=Array.isArray(c.modules)?c.modules:[];return `<article class="course-card glass"><div class="course-icon">${esc(theme.icon||'🎓')}</div><span class="tag">${esc(c.category)} · ${esc(c.level)}</span><h3>${esc(c.title)}</h3><p>${esc(c.description)}</p><ul class="course-modules">${mods.slice(0,4).map(m=>`<li>• ${esc(m)}</li>`).join('')}</ul><div class="course-price">${Number(c.price_eur).toFixed(0)} €</div></article>`}).join('')||'<div class="empty-state">Aucune formation active.</div>'}
+async function loadLamar(){if(!sb)return;const {data}=await sb.from('lamarshop_categories').select('*').eq('active',true).order('sort_order');$('lamarGrid').innerHTML=(data||[]).map(x=>`<article class="lamar-card glass"><div class="lamar-icon">${esc(x.icon)}</div><h3>${esc(x.title)}</h3><p>${esc(x.description)}</p><button class="cta ghost buy" data-product="${esc(x.slug)}" data-price="10">Commander / demander</button></article>`).join('')||'<div class="empty-state">Aucune catégorie.</div>'}
+async function loadVideos(){if(!sb)return;const {data}=await sb.from('video_sections').select('*').eq('active',true).order('sort_order');$('videoGrid').innerHTML=(data||[]).map(x=>`<article class="watch-card glass ${x.age_gate?'locked':''}"><div class="watch-icon">${x.age_gate?'🔞':'▶️'}</div><h3>${esc(x.title)}</h3><p>${esc(x.description)}</p><button class="cta ghost ${x.age_gate?'age-btn':''}" data-video="${esc(x.slug)}">Ouvrir</button></article>`).join('')||'<div class="empty-state">Aucune section vidéo.</div>';document.querySelectorAll('.age-btn').forEach(b=>b.onclick=()=>$('ageGate').showModal())}
+loadCourses();loadLamar();loadVideos();
 
 // Reviews
 let rating=5;const starButtons=[...document.querySelectorAll('#stars button')];function paintStars(){starButtons.forEach((b,i)=>b.classList.toggle('active',i<rating))}paintStars();starButtons.forEach(b=>b.onclick=()=>{rating=+b.dataset.star;document.querySelector('[name=rating]').value=rating;paintStars()});
-async function loadReviews(){if(!sb)return;const list=document.getElementById('reviewList');const {data,error}=await sb.from('reviews').select('display_name,rating,comment,created_at').order('created_at',{ascending:false}).limit(12);if(error||!data?.length)return;list.innerHTML=data.map(r=>`<article class="review-item"><div class="meta"><b>${escapeHtml(r.display_name)}</b><span>${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span></div><p>${escapeHtml(r.comment)}</p></article>`).join('')}
+async function loadReviews(){if(!sb)return;const list=$('reviewList');const {data}=await sb.from('reviews').select('display_name,rating,comment,created_at').eq('approved',true).order('created_at',{ascending:false}).limit(12);if(!data?.length)return;list.innerHTML=data.map(r=>`<article class="review-item"><div class="meta"><b>${esc(r.display_name)}</b><span>${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span></div><p>${esc(r.comment)}</p></article>`).join('')}
 loadReviews();
-document.getElementById('reviewForm').addEventListener('submit',async e=>{e.preventDefault();const status=document.getElementById('reviewStatus');if(!sb){status.textContent='Cloud indisponible.';return}const f=new FormData(e.currentTarget);status.textContent='Envoi...';const {error}=await sb.from('reviews').insert({display_name:f.get('display_name').trim(),rating:+f.get('rating'),comment:f.get('comment').trim(),approved:false});status.textContent=error?'Impossible d’envoyer pour le moment.':'Merci ! Ton avis a été reçu et attend validation.';if(!error)e.currentTarget.reset()});
+$('reviewForm')?.addEventListener('submit',async e=>{e.preventDefault();const status=$('reviewStatus');const f=new FormData(e.currentTarget);status.textContent='Envoi...';const {error}=await sb.from('reviews').insert({display_name:f.get('display_name').trim(),rating:+f.get('rating'),comment:f.get('comment').trim(),approved:false});status.textContent=error?'Impossible d’envoyer pour le moment.':'Merci ! Ton avis attend validation.';if(!error)e.currentTarget.reset()});
 
-// Shop orders
-let selectedVbucks=5;document.querySelectorAll('.variant').forEach(b=>b.onclick=()=>{document.querySelectorAll('.variant').forEach(x=>x.classList.remove('active'));b.classList.add('active');selectedVbucks=+b.dataset.price;document.querySelector('.buy[data-product="vbucks"]').dataset.price=selectedVbucks});
-const checkout=document.getElementById('checkoutModal'),cf=document.getElementById('checkoutForm');document.querySelectorAll('.buy').forEach(b=>b.onclick=()=>{const slug=b.dataset.product,price=+b.dataset.price;cf.product_slug.value=slug;cf.amount_eur.value=price;cf.product_label.value=(slug==='blenderfied'?'BlenderFied':'Carte V-Bucks')+' — '+price+' €';document.getElementById('checkoutStatus').textContent='';checkout.showModal()});
-cf.addEventListener('submit',async e=>{e.preventDefault();const s=document.getElementById('checkoutStatus');if(!sb){s.textContent='Cloud indisponible.';return}const f=new FormData(cf),ref='RLX-'+Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,6).toUpperCase();s.textContent='Enregistrement...';const payload={order_ref:ref,product_slug:f.get('product_slug'),quantity:1,amount_eur:+f.get('amount_eur'),payment_method:f.get('payment_method'),customer_name:f.get('customer_name').trim(),email:f.get('email').trim()||null,phone:f.get('phone').trim()||null,status:'pending'};const {error}=await sb.from('orders').insert(payload);s.textContent=error?'La commande n’a pas pu être enregistrée.':`Commande ${ref} enregistrée. Le paiement réel sera activé après connexion du compte marchand.`});
+// Checkout
+const checkout=$('checkoutModal'),cf=$('checkoutForm');document.addEventListener('click',e=>{const b=e.target.closest('.buy');if(!b||!cf)return;const slug=b.dataset.product||'produit',price=+b.dataset.price||10;cf.product_slug.value=slug;cf.amount_eur.value=price;cf.product_label.value=slug+' — '+price+' €';$('checkoutStatus').textContent='';checkout.showModal()});
+cf?.addEventListener('submit',async e=>{e.preventDefault();const s=$('checkoutStatus'),f=new FormData(cf),ref='RLX-'+Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,6).toUpperCase();s.textContent='Enregistrement...';const payload={order_ref:ref,product_slug:f.get('product_slug'),quantity:1,amount_eur:+f.get('amount_eur'),payment_method:f.get('payment_method'),customer_name:f.get('customer_name').trim(),email:f.get('email').trim()||currentUser?.email||null,phone:f.get('phone').trim()||null,status:'pending'};const {error}=await sb.from('orders').insert(payload);s.textContent=error?'Commande impossible.':`Commande ${ref} enregistrée.`});
 
-function escapeHtml(v=''){return String(v).replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]))}
+document.querySelectorAll('.modal-close').forEach(b=>b.onclick=()=>b.closest('dialog').close());$('confirmAge')?.addEventListener('click',()=>$('ageGate').close());
