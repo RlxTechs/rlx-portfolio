@@ -8,15 +8,58 @@ function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show')
 function fmt(d){return d?new Date(d).toLocaleString('fr-FR'):'—'}
 function setSync(v){$('syncState').textContent=v}
 async function authUser(){const {data:{user}}=await sb.auth.getUser();return user}
+function recoveryMode(){return new URLSearchParams(location.search).get('recovery')==='1'||location.hash.includes('type=recovery')}
+function showRecovery(){
+ $('loginView').hidden=true;$('appView').hidden=true;$('recoveryView').hidden=false;
+}
+function showLogin(){
+ $('recoveryView').hidden=true;$('appView').hidden=true;$('loginView').hidden=false;
+}
+async function sendResetEmail(email,statusEl){
+ const target=(email||'').trim();
+ if(!target){statusEl.textContent='Entre d’abord ton adresse email.';return false}
+ statusEl.textContent='Envoi du lien de récupération…';
+ const {error}=await sb.auth.resetPasswordForEmail(target,{redirectTo:location.origin+'/control?recovery=1'});
+ statusEl.textContent=error?error.message:'Email envoyé. Ouvre le message reçu puis clique sur le lien sécurisé.';
+ return !error;
+}
 async function boot(){
+ if(recoveryMode()){showRecovery();return}
  const user=await authUser();
- if(!user){$('loginView').hidden=false;$('appView').hidden=true;return}
- if((user.email||'').toLowerCase()!==ADMIN_EMAIL){await sb.auth.signOut();$('authStatus').textContent='Ce compte n’est pas autorisé.';return}
- $('loginView').hidden=true;$('appView').hidden=false;$('sessionEmail').textContent=user.email;await refreshAll();
+ if(!user){showLogin();return}
+ if((user.email||'').toLowerCase()!==ADMIN_EMAIL){await sb.auth.signOut();$('authStatus').textContent='Ce compte n’est pas autorisé.';showLogin();return}
+ $('loginView').hidden=true;$('recoveryView').hidden=true;$('appView').hidden=false;$('sessionEmail').textContent=user.email;
+ if($('accountEmail'))$('accountEmail').value=user.email||'';
+ if($('cloudConnectionBadge'))$('cloudConnectionBadge').textContent='Supabase connecté · '+URL.replace('https://','');
+ await refreshAll();
 }
 $('loginBtn').onclick=async()=>{const email=$('email').value.trim(),password=$('password').value;$('authStatus').textContent='Connexion…';const {error}=await sb.auth.signInWithPassword({email,password});$('authStatus').textContent=error?error.message:'';if(!error)boot()};
 $('createBtn').onclick=async()=>{const email=$('email').value.trim(),password=$('password').value;if(email.toLowerCase()!==ADMIN_EMAIL){$('authStatus').textContent='Utilise l’adresse administrateur RLX.';return}if(password.length<8){$('authStatus').textContent='Choisis un mot de passe d’au moins 8 caractères.';return}$('authStatus').textContent='Création…';const {data,error}=await sb.auth.signUp({email,password});$('authStatus').textContent=error?error.message:(data.session?'Accès créé. Connexion…':'Compte créé. Vérifie ton email si Supabase demande une confirmation.');if(data.session)boot()};
-$('logoutBtn').onclick=async()=>{await sb.auth.signOut();location.reload()};
+$('forgotPasswordBtn').onclick=()=>sendResetEmail($('email').value,$('authStatus'));
+$('saveNewPasswordBtn').onclick=async()=>{
+ const p=$('newPassword').value,c=$('confirmNewPassword').value,s=$('recoveryStatus');
+ if(p.length<8){s.textContent='Le mot de passe doit contenir au moins 8 caractères.';return}
+ if(p!==c){s.textContent='Les deux mots de passe ne correspondent pas.';return}
+ s.textContent='Mise à jour…';
+ const {error}=await sb.auth.updateUser({password:p});
+ if(error){s.textContent=error.message;return}
+ s.textContent='Mot de passe modifié. Retour à la connexion…';
+ await sb.auth.signOut();
+ history.replaceState({},'',location.origin+'/control');
+ setTimeout(()=>{showLogin();$('authStatus').textContent='Mot de passe modifié. Tu peux maintenant te connecter.'},500);
+};
+$('cancelRecoveryBtn').onclick=async()=>{await sb.auth.signOut();history.replaceState({},'',location.origin+'/control');showLogin()};
+$('changePasswordBtn').onclick=async()=>{
+ const p=$('accountNewPassword').value,c=$('accountConfirmPassword').value,s=$('accountPasswordStatus');
+ if(p.length<8){s.textContent='8 caractères minimum.';return}
+ if(p!==c){s.textContent='Les mots de passe ne correspondent pas.';return}
+ s.textContent='Mise à jour…';
+ const {error}=await sb.auth.updateUser({password:p});
+ s.textContent=error?error.message:'Mot de passe changé avec succès.';
+ if(!error){$('accountNewPassword').value='';$('accountConfirmPassword').value=''}
+};
+$('sendResetFromAppBtn').onclick=()=>sendResetEmail($('accountEmail').value,$('accountPasswordStatus'));
+$('logoutBtn').onclick=async()=>{await sb.auth.signOut();location.href='/control'};
 $('refreshBtn').onclick=()=>refreshAll();
 document.querySelectorAll('.nav').forEach(b=>b.onclick=()=>{document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));b.classList.add('active');$('tab-'+b.dataset.tab).classList.add('active')});
 
@@ -220,4 +263,4 @@ function renderAudit(){$('auditList').innerHTML=table(['Date','Table','Action','
 function table(headers,rows){return '<table class="data-table"><thead><tr>'+headers.map(h=>'<th>'+h+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+r.map(c=>'<td>'+c+'</td>').join('')+'</tr>').join('')+'</tbody></table>'}
 async function updateStatus(tableName,id,status){const {error}=await sb.from(tableName).update({status}).eq('id',id);if(error)return toast(error.message);toast('Statut mis à jour');refreshAll()}
 async function removeRow(tableName,id,label){if(!confirm('Supprimer '+label+' ?'))return;const {error}=await sb.from(tableName).delete().eq('id',id);if(error)return toast(error.message);toast('Supprimé');refreshAll()}
-sb.auth.onAuthStateChange(()=>boot());boot();
+sb.auth.onAuthStateChange((event)=>{if(event==='PASSWORD_RECOVERY'){showRecovery();return}boot()});boot();
