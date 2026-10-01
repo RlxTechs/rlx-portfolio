@@ -14,3 +14,14 @@
   [headers.values]
     Content-Disposition = "attachment"
     Cache-Control = "public, max-age=3600"
+
+
+[[redirects]]
+  from = "/control"
+  to = "/rlx-control.html"
+  status = 200
+
+[[redirects]]
+  from = "/blenderfied"
+  to = "/blenderfied.html"
+  status = 200
