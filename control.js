@@ -2,265 +2,48 @@ const URL='https://uwfyfuoiksjgyxoovxfn.supabase.co';
 const KEY='sb_publishable_f4RpmT2AsQToBtiBiI6hBg_kqSZbwCj';
 const ADMIN_EMAIL='bossedemardochee@gmail.com';
 const sb=window.supabase.createClient(URL,KEY);
-const state={reviews:[],orders:[],visits:[],messages:[],donations:[],downloads:[],products:[],erp:[],audit:[],analytics:[]};
-const $=id=>document.getElementById(id), esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove('show'),2200)}
-function fmt(d){return d?new Date(d).toLocaleString('fr-FR'):'—'}
+const state={reviews:[],orders:[],messages:[],donations:[],products:[],erp:[],audit:[],analytics:[],visits:[],downloads:[],users:[],marketing:[],promos:[],promoLog:[],courses:[],lamar:[],videos:[]};
+const $=id=>document.getElementById(id);
+const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const fmt=d=>d?new Date(d).toLocaleString('fr-FR'):'—';
+function toast(msg){const t=$('toast');if(!t)return;t.textContent=msg;t.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove('show'),2200)}
 function setSync(v){$('syncState').textContent=v}
 async function authUser(){const {data:{user}}=await sb.auth.getUser();return user}
 function recoveryMode(){return new URLSearchParams(location.search).get('recovery')==='1'||location.hash.includes('type=recovery')}
-function showRecovery(){
- $('loginView').hidden=true;$('appView').hidden=true;$('recoveryView').hidden=false;
-}
-function showLogin(){
- $('recoveryView').hidden=true;$('appView').hidden=true;$('loginView').hidden=false;
-}
-async function sendResetEmail(email,statusEl){
- const target=(email||'').trim();
- if(!target){statusEl.textContent='Entre d’abord ton adresse email.';return false}
- statusEl.textContent='Envoi du lien de récupération…';
- const {error}=await sb.auth.resetPasswordForEmail(target,{redirectTo:location.origin+'/control?recovery=1'});
- statusEl.textContent=error?error.message:'Email envoyé. Ouvre le message reçu puis clique sur le lien sécurisé.';
- return !error;
-}
-async function boot(){
- if(recoveryMode()){showRecovery();return}
- const user=await authUser();
- if(!user){showLogin();return}
- if((user.email||'').toLowerCase()!==ADMIN_EMAIL){await sb.auth.signOut();$('authStatus').textContent='Ce compte n’est pas autorisé.';showLogin();return}
- $('loginView').hidden=true;$('recoveryView').hidden=true;$('appView').hidden=false;$('sessionEmail').textContent=user.email;
- if($('accountEmail'))$('accountEmail').value=user.email||'';
- if($('cloudConnectionBadge'))$('cloudConnectionBadge').textContent='Supabase connecté · '+URL.replace('https://','');
- await refreshAll();
-}
+function showLogin(){if($('loginView'))$('loginView').hidden=false;if($('recoveryView'))$('recoveryView').hidden=true;if($('appView'))$('appView').hidden=true}
+function showRecovery(){if($('loginView'))$('loginView').hidden=true;if($('recoveryView'))$('recoveryView').hidden=false;if($('appView'))$('appView').hidden=true}
+async function sendResetEmail(email,statusEl){const target=(email||'').trim();if(!target){statusEl.textContent='Entre ton email.';return}statusEl.textContent='Envoi du lien...';const {error}=await sb.auth.resetPasswordForEmail(target,{redirectTo:location.origin+'/control?recovery=1'});statusEl.textContent=error?error.message:'Email envoyé. Vérifie Gmail / spam.'}
+async function boot(){if(recoveryMode()){showRecovery();return}const user=await authUser();if(!user){showLogin();return}if((user.email||'').toLowerCase()!==ADMIN_EMAIL){await sb.auth.signOut();showLogin();$('authStatus').textContent='Ce compte n’est pas autorisé.';return}$('loginView').hidden=true;$('recoveryView').hidden=true;$('appView').hidden=false;$('sessionEmail').textContent=user.email;if($('accountEmail'))$('accountEmail').value=user.email;if($('cloudConnectionBadge'))$('cloudConnectionBadge').textContent='Supabase connecté · '+URL.replace('https://','');await refreshAll()}
 $('loginBtn').onclick=async()=>{const email=$('email').value.trim(),password=$('password').value;$('authStatus').textContent='Connexion…';const {error}=await sb.auth.signInWithPassword({email,password});$('authStatus').textContent=error?error.message:'';if(!error)boot()};
-$('createBtn').onclick=async()=>{const email=$('email').value.trim(),password=$('password').value;if(email.toLowerCase()!==ADMIN_EMAIL){$('authStatus').textContent='Utilise l’adresse administrateur RLX.';return}if(password.length<8){$('authStatus').textContent='Choisis un mot de passe d’au moins 8 caractères.';return}$('authStatus').textContent='Création…';const {data,error}=await sb.auth.signUp({email,password});$('authStatus').textContent=error?error.message:(data.session?'Accès créé. Connexion…':'Compte créé. Vérifie ton email si Supabase demande une confirmation.');if(data.session)boot()};
+$('createBtn').onclick=async()=>{const email=$('email').value.trim(),password=$('password').value;if(email.toLowerCase()!==ADMIN_EMAIL){$('authStatus').textContent='Utilise l’adresse administrateur RLX.';return}if(password.length<8){$('authStatus').textContent='8 caractères minimum.';return}$('authStatus').textContent='Création…';const {data,error}=await sb.auth.signUp({email,password});$('authStatus').textContent=error?error.message:(data.session?'Accès créé. Connexion…':'Compte créé. Vérifie ton email si Supabase demande une confirmation.');if(data.session)boot()};
 $('forgotPasswordBtn').onclick=()=>sendResetEmail($('email').value,$('authStatus'));
-$('saveNewPasswordBtn').onclick=async()=>{
- const p=$('newPassword').value,c=$('confirmNewPassword').value,s=$('recoveryStatus');
- if(p.length<8){s.textContent='Le mot de passe doit contenir au moins 8 caractères.';return}
- if(p!==c){s.textContent='Les deux mots de passe ne correspondent pas.';return}
- s.textContent='Mise à jour…';
- const {error}=await sb.auth.updateUser({password:p});
- if(error){s.textContent=error.message;return}
- s.textContent='Mot de passe modifié. Retour à la connexion…';
- await sb.auth.signOut();
- history.replaceState({},'',location.origin+'/control');
- setTimeout(()=>{showLogin();$('authStatus').textContent='Mot de passe modifié. Tu peux maintenant te connecter.'},500);
-};
+$('saveNewPasswordBtn').onclick=async()=>{const p=$('newPassword').value,c=$('confirmNewPassword').value,s=$('recoveryStatus');if(p.length<8){s.textContent='8 caractères minimum.';return}if(p!==c){s.textContent='Les deux mots de passe ne correspondent pas.';return}s.textContent='Mise à jour…';const {error}=await sb.auth.updateUser({password:p});if(error){s.textContent=error.message;return}await sb.auth.signOut();history.replaceState({},'',location.origin+'/control');showLogin();$('authStatus').textContent='Mot de passe modifié. Connecte-toi.'};
 $('cancelRecoveryBtn').onclick=async()=>{await sb.auth.signOut();history.replaceState({},'',location.origin+'/control');showLogin()};
-$('changePasswordBtn').onclick=async()=>{
- const p=$('accountNewPassword').value,c=$('accountConfirmPassword').value,s=$('accountPasswordStatus');
- if(p.length<8){s.textContent='8 caractères minimum.';return}
- if(p!==c){s.textContent='Les mots de passe ne correspondent pas.';return}
- s.textContent='Mise à jour…';
- const {error}=await sb.auth.updateUser({password:p});
- s.textContent=error?error.message:'Mot de passe changé avec succès.';
- if(!error){$('accountNewPassword').value='';$('accountConfirmPassword').value=''}
-};
-$('sendResetFromAppBtn').onclick=()=>sendResetEmail($('accountEmail').value,$('accountPasswordStatus'));
 $('logoutBtn').onclick=async()=>{await sb.auth.signOut();location.href='/control'};
 $('refreshBtn').onclick=()=>refreshAll();
+
+async function fetchTable(name,limit=500,order='created_at'){const q=sb.from(name).select('*').limit(limit);if(order)q.order(order,{ascending:false});const {data,error}=await q;if(error)throw error;return data||[]}
+async function fetchJsonTable(name,limit=300){const {data,error}=await sb.from(name).select('*').order('updated_at',{ascending:false}).limit(limit);if(error)throw error;return data||[]}
+async function refreshAll(){setSync('Synchronisation…');try{const [reviews,orders,messages,donations,products,erp,audit,analytics,users,marketing,promos,promoLog,courses,lamar,videos]=await Promise.all([fetchTable('reviews'),fetchTable('orders'),fetchTable('contact_messages'),fetchTable('donations'),fetchJsonTable('products'),fetchJsonTable('erp_state'),fetchTable('audit_events',300),fetchTable('analytics_events',2000),fetchTable('user_profiles',500),fetchTable('marketing_preferences',500),fetchTable('promo_campaigns',100),fetchTable('promo_send_log',300),fetchJsonTable('training_courses',200),fetchJsonTable('lamarshop_categories',200),fetchJsonTable('video_sections',200)]);Object.assign(state,{reviews,orders,messages,donations,products,erp,audit,analytics,users,marketing,promos,promoLog,courses,lamar,videos,visits:analytics.filter(x=>x.event_type==='page_view'),downloads:analytics.filter(x=>x.event_type==='download')});renderAll();$('lastRefresh').textContent='Mis à jour '+new Date().toLocaleTimeString('fr-FR');setSync('À jour')}catch(e){console.error(e);setSync('Erreur');toast(e.message||'Accès refusé')}}
+function renderAll(){const pending=state.reviews.filter(x=>!x.approved).length,optins=state.marketing.filter(x=>x.opt_in&&!x.unsubscribed_at).length;$('statVisits').textContent=state.visits.length;$('statReviews').textContent=state.reviews.length;$('statUsers').textContent=state.users.length;$('statOptins').textContent=optins;$('statOrders').textContent=state.orders.length;$('statDownloads').textContent=state.downloads.length;$('statProducts').textContent=state.products.length;$('statErp').textContent=state.erp.length;$('pendingBadge').textContent=pending||'';$('usersBadge').textContent=state.users.length||'';$('promosBadge').textContent=state.promos.filter(x=>x.active).length||'';$('productsBadge').textContent=state.products.length||'';$('erpBadge').textContent=state.erp.length||'';renderAnalytics();renderUsers();renderPromos();renderContent();renderReviews();renderOrders();renderDownloads();renderProducts();renderErp();renderAudit();renderRecent()}
+function renderRecent(){const all=[...state.reviews.map(x=>({t:x.created_at,label:'Avis',text:x.display_name+' · '+x.rating+'/5'})),...state.orders.map(x=>({t:x.created_at,label:'Commande',text:x.order_ref+' · '+x.customer_name})),...state.users.map(x=>({t:x.created_at,label:'Utilisateur',text:x.email||x.id})),...state.promoLog.map(x=>({t:x.created_at,label:'Promo',text:x.email+' · '+x.status}))].sort((a,b)=>new Date(b.t||0)-new Date(a.t||0)).slice(0,10);$('recentActivity').innerHTML=all.map(x=>'<div class="card"><div class="card-head"><b>'+esc(x.label)+'</b><span class="meta">'+fmt(x.t)+'</span></div><div>'+esc(x.text)+'</div></div>').join('')||'<div class="empty">Aucune activité.</div>'}
+
 document.querySelectorAll('.nav').forEach(b=>b.onclick=()=>{document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));b.classList.add('active');$('tab-'+b.dataset.tab).classList.add('active')});
-
-async function fetchTable(name,limit=200){
- const {data,error}=await sb.from(name).select('*').order('created_at',{ascending:false}).limit(limit);
- if(error) throw error; return data||[];
-}
-async function fetchJsonTable(name,limit=200){
- const {data,error}=await sb.from(name).select('*').order('updated_at',{ascending:false}).limit(limit);
- if(error) throw error; return data||[];
-}
-async function refreshAll(){
- setSync('Synchronisation…');
- try{
-   const [reviews,orders,messages,donations,products,erp,audit,analytics]=await Promise.all([
-     fetchTable('reviews'),
-     fetchTable('orders'),
-     fetchTable('contact_messages'),
-     fetchTable('donations'),
-     fetchJsonTable('products'),
-     fetchJsonTable('erp_state'),
-     fetchTable('audit_events',300),
-     fetchTable('analytics_events',2000)
-   ]);
-   const visits=analytics.filter(x=>x.event_type==='page_view');
-   const downloads=analytics.filter(x=>x.event_type==='download');
-   Object.assign(state,{reviews,orders,visits,messages,donations,downloads,products,erp,audit,analytics});
-   renderAll();$('lastRefresh').textContent='Mis à jour '+new Date().toLocaleTimeString('fr-FR');setSync('À jour');
- }catch(e){console.error(e);setSync('Erreur');toast(e.message||'Accès aux données refusé')}
-}
-function renderAll(){
- const pending=state.reviews.filter(x=>!x.approved).length;
- $('statVisits').textContent=state.visits.length;$('statReviews').textContent=state.reviews.length;$('statPending').textContent=pending;$('statOrders').textContent=state.orders.length;$('statMessages').textContent=state.messages.length;$('statDonations').textContent=state.donations.length;$('statProducts').textContent=state.products.length;$('statErp').textContent=state.erp.length;$('pendingBadge').textContent=pending||'';$('productsBadge').textContent=state.products.length||'';$('erpBadge').textContent=state.erp.length||'';
- renderAnalytics();renderReviews();renderOrders();renderVisits();renderMessages();renderDonations();renderDownloads();renderProducts();renderErp();renderAudit();renderRecent();
-}
-function renderRecent(){
- const all=[
-  ...state.reviews.map(x=>({t:x.created_at,label:'Avis',text:x.display_name+' · '+x.rating+'/5'})),
-  ...state.orders.map(x=>({t:x.created_at,label:'Commande',text:x.order_ref+' · '+x.customer_name})),
-  ...state.messages.map(x=>({t:x.created_at,label:'Message',text:x.display_name+' · '+x.subject})),
-  ...state.products.map(x=>({t:x.updated_at,label:'Produit',text:x.id})),
-  ...state.erp.map(x=>({t:x.updated_at,label:'ERP State',text:x.id}))
- ].sort((a,b)=>new Date(b.t||0)-new Date(a.t||0)).slice(0,8);
- $('recentActivity').innerHTML=all.map(x=>'<div class="card"><div class="card-head"><b>'+esc(x.label)+'</b><span class="meta">'+fmt(x.t)+'</span></div><div>'+esc(x.text)+'</div></div>').join('')||'<div class="empty">Aucune activité.</div>';
-}
-function renderReviews(){
- const q=($('reviewSearch').value||'').toLowerCase(), rows=state.reviews.filter(x=>(x.display_name+' '+x.comment).toLowerCase().includes(q));
- $('reviewsList').innerHTML=rows.map(x=>'<article class="card"><div class="card-head"><div><b>'+esc(x.display_name)+'</b><div class="meta">'+x.rating+'/5 · '+fmt(x.created_at)+'</div></div><span class="pill '+(x.approved?'good':'warn')+'">'+(x.approved?'Publié':'En attente')+'</span></div><div>'+esc(x.comment)+'</div><div class="card-actions"><button class="'+(x.approved?'':'good')+'" data-review-toggle="'+x.id+'" data-approved="'+x.approved+'">'+(x.approved?'Retirer du site':'Publier')+'</button><button class="danger" data-review-delete="'+x.id+'">Supprimer</button></div></article>').join('')||'<div class="empty">Aucun avis.</div>';
- document.querySelectorAll('[data-review-toggle]').forEach(b=>b.onclick=()=>updateReview(b.dataset.reviewToggle,b.dataset.approved!=='true'));
- document.querySelectorAll('[data-review-delete]').forEach(b=>b.onclick=()=>removeRow('reviews',b.dataset.reviewDelete,'cet avis'));
-}
-$('reviewSearch').oninput=renderReviews;
-async function updateReview(id,approved){const {error}=await sb.from('reviews').update({approved}).eq('id',id);if(error)return toast(error.message);toast(approved?'Avis publié':'Avis retiré');refreshAll()}
-function renderOrders(){
- const q=($('orderSearch').value||'').toLowerCase(), rows=state.orders.filter(x=>(x.order_ref+' '+x.customer_name+' '+x.product_slug).toLowerCase().includes(q));
- $('ordersList').innerHTML=rows.map(x=>'<article class="card"><div class="card-head"><div><b>'+esc(x.order_ref)+'</b><div class="meta">'+esc(x.customer_name)+' · '+fmt(x.created_at)+'</div></div><b>'+Number(x.amount_eur).toFixed(2)+' €</b></div><div>'+esc(x.product_slug)+' · '+esc(x.payment_method)+'</div><div class="card-actions"><select data-order-status="'+x.id+'">'+['pending','payment_requested','paid','cancelled','refunded'].map(s=>'<option '+(s===x.status?'selected':'')+'>'+s+'</option>').join('')+'</select><button class="danger" data-order-delete="'+x.id+'">Supprimer</button></div></article>').join('')||'<div class="empty">Aucune commande.</div>';
- document.querySelectorAll('[data-order-status]').forEach(s=>s.onchange=()=>updateStatus('orders',s.dataset.orderStatus,s.value));
- document.querySelectorAll('[data-order-delete]').forEach(b=>b.onclick=()=>removeRow('orders',b.dataset.orderDelete,'cette commande'));
-}
-$('orderSearch').oninput=renderOrders;
-function renderVisits(){
- $('visitsList').innerHTML=table(['Date','Page','Pays','Ville','Appareil','Navigateur','OS','Écran','Session'],state.visits.map(x=>[
-   fmt(x.created_at),esc(x.path),esc(x.country_name||x.country_code||'—'),esc(x.city||'—'),esc(x.device_type||'—'),esc(x.browser||'—'),esc(x.os||'—'),
-   x.screen_width&&x.screen_height?x.screen_width+'×'+x.screen_height:'—',esc((x.session_id||'').slice(0,10))
- ]));
-}
-function renderMessages(){
- $('messagesList').innerHTML=state.messages.map(x=>'<article class="card"><div class="card-head"><div><b>'+esc(x.display_name)+'</b><div class="meta">'+esc(x.email)+' · '+fmt(x.created_at)+'</div></div><span class="pill '+(x.status==='new'?'warn':'')+'">'+esc(x.status)+'</span></div><b>'+esc(x.subject)+'</b><div>'+esc(x.message)+'</div><div class="card-actions"><select data-message-status="'+x.id+'">'+['new','read','archived'].map(s=>'<option '+(s===x.status?'selected':'')+'>'+s+'</option>').join('')+'</select><button class="danger" data-message-delete="'+x.id+'">Supprimer</button></div></article>').join('')||'<div class="empty">Aucun message.</div>';
- document.querySelectorAll('[data-message-status]').forEach(s=>s.onchange=()=>updateStatus('contact_messages',s.dataset.messageStatus,s.value));
- document.querySelectorAll('[data-message-delete]').forEach(b=>b.onclick=()=>removeRow('contact_messages',b.dataset.messageDelete,'ce message'));
-}
-function renderDonations(){
- $('donationsList').innerHTML=state.donations.map(x=>'<article class="card"><div class="card-head"><div><b>'+esc(x.donor_name||'Anonyme')+'</b><div class="meta">'+esc(x.campaign_slug)+' · '+fmt(x.created_at)+'</div></div><b>'+Number(x.amount_eur).toFixed(2)+' €</b></div><div>'+esc(x.payment_method)+' · '+esc(x.message||'')+'</div><div class="card-actions"><select data-donation-status="'+x.id+'">'+['pending','confirmed','rejected','refunded'].map(s=>'<option '+(s===x.status?'selected':'')+'>'+s+'</option>').join('')+'</select><button class="danger" data-donation-delete="'+x.id+'">Supprimer</button></div></article>').join('')||'<div class="empty">Aucun don.</div>';
- document.querySelectorAll('[data-donation-status]').forEach(s=>s.onchange=()=>updateStatus('donations',s.dataset.donationStatus,s.value));
- document.querySelectorAll('[data-donation-delete]').forEach(b=>b.onclick=()=>removeRow('donations',b.dataset.donationDelete,'ce don'));
-}
-function renderDownloads(){$('downloadsList').innerHTML=table(['Date','Fichier','Pays','Ville','Appareil','Navigateur','OS','Page','Session'],state.downloads.map(x=>[
- fmt(x.created_at),esc(x.asset_slug||'—'),esc(x.country_name||x.country_code||'—'),esc(x.city||'—'),esc(x.device_type||'—'),esc(x.browser||'—'),esc(x.os||'—'),esc(x.path||'—'),esc((x.session_id||'').slice(0,14))
-]))}
-
-
-function analyticsFiltered(){
- const v=$('analyticsRange')?.value||'7';
- if(v==='all')return [...state.analytics];
- const days=Number(v)||7,cut=Date.now()-days*86400000;
- return state.analytics.filter(x=>new Date(x.created_at).getTime()>=cut);
-}
-function countBy(rows,keyFn){
- const m=new Map();
- for(const row of rows){const k=keyFn(row)||'Inconnu';m.set(k,(m.get(k)||0)+1)}
- return [...m.entries()].sort((a,b)=>b[1]-a[1]);
-}
-function bars(rows,maxRows=8){
- if(!rows.length)return '<div class="empty">Pas encore de données.</div>';
- const max=Math.max(...rows.map(x=>x[1]),1);
- return '<div class="bar-list">'+rows.slice(0,maxRows).map(([label,count])=>'<div class="bar-row"><div class="bar-label"><span>'+esc(label)+'</span><b>'+count+'</b></div><div class="bar-track"><i style="width:'+Math.max(4,count/max*100)+'%"></i></div></div>').join('')+'</div>';
-}
-function renderAnalytics(){
- const rows=analyticsFiltered(),page=rows.filter(x=>x.event_type==='page_view'),downloads=rows.filter(x=>x.event_type==='download'),productClicks=rows.filter(x=>x.event_type==='product_click');
- const sessions=new Set(rows.map(x=>x.session_id).filter(Boolean));
- const countries=new Set(rows.map(x=>x.country_code||x.country_name).filter(Boolean));
- const mobile=rows.filter(x=>x.device_type==='Mobile'||x.device_type==='Tablette').length;
- $('aPageViews').textContent=page.length;
- $('aSessions').textContent=sessions.size;
- $('aDownloads').textContent=downloads.length;
- $('aCountries').textContent=countries.size;
- $('aMobile').textContent=rows.length?Math.round(mobile/rows.length*100)+'%':'0%';
- $('aProductClicks').textContent=productClicks.length;
- $('analyticsCount').textContent=rows.length+' événements';
- $('topCountries').innerHTML=bars(countBy(rows,x=>x.country_name||x.country_code||'Inconnu'));
- $('topDevices').innerHTML=bars(countBy(rows,x=>x.device_type||'Inconnu'));
- $('topBrowsers').innerHTML=bars(countBy(rows,x=>x.browser||'Inconnu'));
- $('topOs').innerHTML=bars(countBy(rows,x=>x.os||'Inconnu'));
- $('topPages').innerHTML=bars(countBy(page,x=>x.path||'/'));
- $('topDownloads').innerHTML=bars(countBy(downloads,x=>x.asset_slug||'Fichier inconnu'));
- const recent=[...rows].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,80);
- $('analyticsRecent').innerHTML=table(['Date','Événement','Page / fichier','Pays','Ville','Appareil','Navigateur','OS','Session'],recent.map(x=>[
-   fmt(x.created_at),esc(x.event_type),esc(x.asset_slug||x.path||'—'),esc(x.country_name||x.country_code||'—'),esc(x.city||'—'),esc(x.device_type||'—'),esc(x.browser||'—'),esc(x.os||'—'),esc((x.session_id||'').slice(0,12))
- ]));
-}
-$('analyticsRange').onchange=renderAnalytics;
-$('exportAnalyticsBtn').onclick=()=>{
- const rows=analyticsFiltered();
- const cols=['created_at','event_type','path','asset_slug','country_code','country_name','region','city','device_type','browser','os','platform','locale','timezone','screen_width','screen_height','viewport_width','viewport_height','session_id'];
- const q=v=>'"'+String(v??'').replaceAll('"','""')+'"';
- const csv=[cols.join(','),...rows.map(r=>cols.map(k=>q(r[k])).join(','))].join('\r\n');
- const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='RLX_Analytics_'+new Date().toISOString().slice(0,10)+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)
-};
-
-let deferredInstallPrompt=null;
-window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;$('installAppBtn').hidden=false});
-$('installAppBtn').onclick=async()=>{if(!deferredInstallPrompt)return toast('Utilise le menu du navigateur → Installer RLX Control');deferredInstallPrompt.prompt();await deferredInstallPrompt.userChoice;deferredInstallPrompt=null;$('installAppBtn').hidden=true};
-window.addEventListener('appinstalled',()=>{$('installAppBtn').hidden=true;toast('RLX Control installé')});
-if('serviceWorker' in navigator)navigator.serviceWorker.register('/control-sw.js').catch(()=>{});
-
-function safeJson(value){try{return JSON.stringify(value??{},null,2)}catch{return '{}'}}
-function parseEditorJson(text,label){
- try{return JSON.parse(text)}
- catch(e){throw new Error(label+' : JSON invalide — '+e.message)}
-}
-function renderJsonRows(kind){
- const cfg=kind==='product'
-  ?{rows:state.products,list:'productsList',search:'productSearch',count:'productCountLabel',edit:'product-edit',del:'product-delete'}
-  :{rows:state.erp,list:'erpList',search:'erpSearch',count:'erpCountLabel',edit:'erp-edit',del:'erp-delete'};
- const q=($(cfg.search)?.value||'').toLowerCase();
- const rows=cfg.rows.filter(x=>(x.id+' '+safeJson(x.data)).toLowerCase().includes(q));
- $(cfg.count).textContent=rows.length+' élément'+(rows.length>1?'s':'');
- $(cfg.list).innerHTML=rows.map(x=>{
-   const preview=safeJson(x.data);
-   return '<article class="card json-record"><div class="card-head"><div><b>'+esc(x.id)+'</b><div class="meta">Mis à jour '+fmt(x.updated_at)+'</div></div><span class="pill">JSON</span></div><pre>'+esc(preview)+'</pre><div class="card-actions"><button data-'+cfg.edit+'="'+esc(x.id)+'">Modifier</button><button class="danger" data-'+cfg.del+'="'+esc(x.id)+'">Supprimer</button></div></article>';
- }).join('')||'<div class="empty">Aucune donnée.</div>';
- document.querySelectorAll('[data-'+cfg.edit+']').forEach(b=>b.onclick=()=>openJsonRecord(kind,b.getAttribute('data-'+cfg.edit)));
- document.querySelectorAll('[data-'+cfg.del+']').forEach(b=>b.onclick=()=>deleteJsonRecord(kind,b.getAttribute('data-'+cfg.del)));
-}
-function renderProducts(){renderJsonRows('product')}
-function renderErp(){renderJsonRows('erp')}
-
-function resetJsonEditor(kind){
- const isProduct=kind==='product';
- const idEl=$(isProduct?'productId':'erpId'),dataEl=$(isProduct?'productData':'erpData'),title=$(isProduct?'productEditorTitle':'erpEditorTitle'),del=$(isProduct?'deleteProductBtn':'deleteErpBtn'),status=$(isProduct?'productEditorStatus':'erpEditorStatus');
- idEl.value='';idEl.readOnly=false;del.disabled=true;status.textContent='';
- title.textContent=isProduct?'Nouveau produit':'Nouvel état ERP';
- dataEl.value=isProduct
-  ?'{\n  "name": "Nouveau produit",\n  "price": 0,\n  "currency": "EUR",\n  "active": true\n}'
-  :'{\n  "version": 1,\n  "app": "BOCAR GESTION",\n  "state": {}\n}';
-}
-function openJsonRecord(kind,id){
- const isProduct=kind==='product',rows=isProduct?state.products:state.erp,row=rows.find(x=>x.id===id);if(!row)return;
- const idEl=$(isProduct?'productId':'erpId'),dataEl=$(isProduct?'productData':'erpData'),title=$(isProduct?'productEditorTitle':'erpEditorTitle'),del=$(isProduct?'deleteProductBtn':'deleteErpBtn');
- idEl.value=row.id;idEl.readOnly=true;dataEl.value=safeJson(row.data);title.textContent=(isProduct?'Produit : ':'ERP State : ')+row.id;del.disabled=false;
- window.scrollTo({top:0,behavior:'smooth'});
-}
-async function saveJsonRecord(kind){
- const isProduct=kind==='product',tableName=isProduct?'products':'erp_state',idEl=$(isProduct?'productId':'erpId'),dataEl=$(isProduct?'productData':'erpData'),status=$(isProduct?'productEditorStatus':'erpEditorStatus');
- const rowId=idEl.value.trim();if(!rowId){status.textContent='Identifiant obligatoire.';return}
- let data;try{data=parseEditorJson(dataEl.value,isProduct?'Produit':'ERP State')}catch(e){status.textContent=e.message;return}
- status.textContent='Enregistrement…';
- const {error}=await sb.from(tableName).upsert({id:rowId,data,updated_at:new Date().toISOString()},{onConflict:'id'});
- if(error){status.textContent=error.message;return}
- status.textContent='Enregistré.';toast((isProduct?'Produit':'ERP State')+' sauvegardé');await refreshAll();openJsonRecord(kind,rowId);
-}
-async function deleteJsonRecord(kind,id){
- const isProduct=kind==='product',tableName=isProduct?'products':'erp_state',label=isProduct?'le produit':'l’état ERP';
- if(!confirm('Supprimer '+label+' « '+id+' » ?'))return;
- const {error}=await sb.from(tableName).delete().eq('id',id);if(error)return toast(error.message);
- toast('Supprimé');resetJsonEditor(kind);await refreshAll();
-}
-
-$('productSearch').oninput=renderProducts;
-$('erpSearch').oninput=renderErp;
-$('newProductBtn').onclick=()=>resetJsonEditor('product');
-$('resetProductBtn').onclick=()=>resetJsonEditor('product');
-$('saveProductBtn').onclick=()=>saveJsonRecord('product');
-$('deleteProductBtn').onclick=()=>{const id=$('productId').value.trim();if(id)deleteJsonRecord('product',id)};
-$('newErpBtn').onclick=()=>resetJsonEditor('erp');
-$('resetErpBtn').onclick=()=>resetJsonEditor('erp');
-$('saveErpBtn').onclick=()=>saveJsonRecord('erp');
-$('deleteErpBtn').onclick=()=>{const id=$('erpId').value.trim();if(id)deleteJsonRecord('erp',id)};
-
-function renderAudit(){$('auditList').innerHTML=table(['Date','Table','Action','Acteur','Record'],state.audit.map(x=>[fmt(x.created_at),esc(x.source_table),esc(x.action),esc(x.actor_email||'—'),esc(x.record_id||'—')]))}
 function table(headers,rows){return '<table class="data-table"><thead><tr>'+headers.map(h=>'<th>'+h+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+r.map(c=>'<td>'+c+'</td>').join('')+'</tr>').join('')+'</tbody></table>'}
-async function updateStatus(tableName,id,status){const {error}=await sb.from(tableName).update({status}).eq('id',id);if(error)return toast(error.message);toast('Statut mis à jour');refreshAll()}
-async function removeRow(tableName,id,label){if(!confirm('Supprimer '+label+' ?'))return;const {error}=await sb.from(tableName).delete().eq('id',id);if(error)return toast(error.message);toast('Supprimé');refreshAll()}
-sb.auth.onAuthStateChange((event)=>{if(event==='PASSWORD_RECOVERY'){showRecovery();return}boot()});boot();
+function countBy(rows,fn){const m=new Map();for(const r of rows){const k=fn(r)||'Inconnu';m.set(k,(m.get(k)||0)+1)}return [...m.entries()].sort((a,b)=>b[1]-a[1])}
+function bars(rows,n=8){if(!rows.length)return '<div class="empty">Pas encore de données.</div>';const max=Math.max(...rows.map(x=>x[1]),1);return '<div class="bar-list">'+rows.slice(0,n).map(([l,c])=>'<div class="bar-row"><div class="bar-label"><span>'+esc(l)+'</span><b>'+c+'</b></div><div class="bar-track"><i style="width:'+Math.max(4,c/max*100)+'%"></i></div></div>').join('')+'</div>'}
+function analyticsFiltered(){const v=$('analyticsRange')?.value||'7';if(v==='all')return[...state.analytics];const cut=Date.now()-(Number(v)||7)*86400000;return state.analytics.filter(x=>new Date(x.created_at).getTime()>=cut)}
+function renderAnalytics(){const rows=analyticsFiltered(),page=rows.filter(x=>x.event_type==='page_view'),dl=rows.filter(x=>x.event_type==='download'),clicks=rows.filter(x=>x.event_type==='product_click'),sessions=new Set(rows.map(x=>x.session_id).filter(Boolean)),countries=new Set(rows.map(x=>x.country_code||x.country_name).filter(Boolean)),mobile=rows.filter(x=>x.device_type==='Mobile'||x.device_type==='Tablette').length;$('aPageViews').textContent=page.length;$('aSessions').textContent=sessions.size;$('aDownloads').textContent=dl.length;$('aCountries').textContent=countries.size;$('aMobile').textContent=rows.length?Math.round(mobile/rows.length*100)+'%':'0%';$('aProductClicks').textContent=clicks.length;$('analyticsCount').textContent=rows.length+' événements';$('topCountries').innerHTML=bars(countBy(rows,x=>x.country_name||x.country_code));$('topDevices').innerHTML=bars(countBy(rows,x=>x.device_type));$('topBrowsers').innerHTML=bars(countBy(rows,x=>x.browser));$('topOs').innerHTML=bars(countBy(rows,x=>x.os));$('topPages').innerHTML=bars(countBy(page,x=>x.path));$('topDownloads').innerHTML=bars(countBy(dl,x=>x.asset_slug));$('analyticsRecent').innerHTML=table(['Date','Événement','Page / fichier','Pays','Ville','Appareil','Navigateur','OS','Session'],[...rows].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,80).map(x=>[fmt(x.created_at),esc(x.event_type),esc(x.asset_slug||x.path||'—'),esc(x.country_name||x.country_code||'—'),esc(x.city||'—'),esc(x.device_type||'—'),esc(x.browser||'—'),esc(x.os||'—'),esc((x.session_id||'').slice(0,12))]))}
+$('analyticsRange').onchange=renderAnalytics;$('exportAnalyticsBtn').onclick=()=>{const rows=analyticsFiltered(),cols=['created_at','event_type','path','asset_slug','country_code','country_name','region','city','device_type','browser','os','platform','locale','timezone','screen_width','screen_height','session_id'],q=v=>'"'+String(v??'').replaceAll('"','""')+'"',csv=[cols.join(','),...rows.map(r=>cols.map(k=>q(r[k])).join(','))].join('\r\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='RLX_Analytics_'+new Date().toISOString().slice(0,10)+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
+function renderUsers(){const q=($('userSearch')?.value||'').toLowerCase();const rows=state.users.filter(u=>(u.email+' '+u.full_name+' '+u.city+' '+u.country).toLowerCase().includes(q));$('usersList').innerHTML=rows.map(u=>{const pref=state.marketing.find(p=>p.user_id===u.id);return '<article class="card"><div class="card-head"><div><b>'+esc(u.email||u.id)+'</b><div class="meta">Créé '+fmt(u.created_at)+' · Vu '+fmt(u.last_seen_at)+'</div></div><span class="pill '+(pref?.opt_in&&!pref?.unsubscribed_at?'good':'')+'">'+(pref?.opt_in&&!pref?.unsubscribed_at?'Promos ON':'Promos OFF')+'</span></div><div>'+esc([u.full_name,u.city,u.country].filter(Boolean).join(' · ')||'Profil incomplet')+'</div><div class="card-actions"><button data-toggle-marketing="'+u.id+'" data-email="'+esc(u.email||'')+'" data-on="'+(pref?.opt_in&&!pref?.unsubscribed_at)+'">'+(pref?.opt_in&&!pref?.unsubscribed_at?'Désactiver promos':'Activer promos')+'</button></div></article>'}).join('')||'<div class="empty">Aucun utilisateur.</div>';document.querySelectorAll('[data-toggle-marketing]').forEach(b=>b.onclick=()=>toggleMarketing(b.dataset.toggleMarketing,b.dataset.email,b.dataset.on!=='true'))}
+$('userSearch').oninput=renderUsers;async function toggleMarketing(user_id,email,on){const row={user_id,email,opt_in:on,cadence_hours:18,updated_at:new Date().toISOString(),unsubscribed_at:on?null:new Date().toISOString()};const {error}=await sb.from('marketing_preferences').upsert(row,{onConflict:'user_id'});if(error)return toast(error.message);toast(on?'Promos activées':'Promos désactivées');refreshAll()}
+function renderPromos(){const q=($('promoSearch')?.value||'').toLowerCase();const rows=state.promos.filter(p=>(p.title+' '+p.message).toLowerCase().includes(q));$('promoCountLabel').textContent=rows.length+' campagne'+(rows.length>1?'s':'');$('promosList').innerHTML=rows.map(p=>'<article class="card"><div class="card-head"><div><b>'+esc(p.title)+'</b><div class="meta">'+esc(p.segment)+' · min '+Number(p.min_purchase_eur||0)+' € · '+fmt(p.starts_at)+'</div></div><span class="pill '+(p.active?'good':'')+'">'+(p.active?'Active':'Inactive')+'</span></div><p>'+esc(p.message)+'</p><div class="card-actions"><button data-promo-edit="'+p.id+'">Modifier</button><button class="danger" data-promo-del="'+p.id+'">Supprimer</button></div></article>').join('')||'<div class="empty">Aucune campagne.</div>';$('promoLog').innerHTML=table(['Date','Email','Statut','Provider','Erreur'],state.promoLog.slice(0,80).map(x=>[fmt(x.created_at),esc(x.email),esc(x.status),esc(x.provider||'—'),esc(x.error||'—')]));document.querySelectorAll('[data-promo-edit]').forEach(b=>b.onclick=()=>openPromo(b.dataset.promoEdit));document.querySelectorAll('[data-promo-del]').forEach(b=>b.onclick=()=>deletePromo(b.dataset.promoDel))}
+$('promoSearch').oninput=renderPromos;function resetPromo(){$('promoId').value='';$('promoTitle').value='';$('promoMessage').value='';$('promoCtaLabel').value="Voir l'offre";$('promoCtaUrl').value='https://rlx-kingdom.netlify.app/#lamarshop';$('promoSegment').value='all';$('promoMin').value=10;$('promoActive').checked=true;$('deletePromoBtn').disabled=true;$('promoEditorTitle').textContent='Nouvelle campagne';$('promoStatus').textContent=''}$('resetPromoBtn').onclick=resetPromo;function openPromo(id){const p=state.promos.find(x=>x.id===id);if(!p)return;$('promoId').value=p.id;$('promoTitle').value=p.title;$('promoMessage').value=p.message;$('promoCtaLabel').value=p.cta_label;$('promoCtaUrl').value=p.cta_url;$('promoSegment').value=p.segment;$('promoMin').value=p.min_purchase_eur;$('promoActive').checked=p.active;$('deletePromoBtn').disabled=false;$('promoEditorTitle').textContent='Campagne : '+p.title}async function savePromo(){const payload={title:$('promoTitle').value.trim(),message:$('promoMessage').value.trim(),cta_label:$('promoCtaLabel').value.trim()||'Voir',cta_url:$('promoCtaUrl').value.trim(),segment:$('promoSegment').value.trim()||'all',min_purchase_eur:+$('promoMin').value||0,active:$('promoActive').checked,starts_at:new Date().toISOString(),updated_at:new Date().toISOString()};if(!payload.title||!payload.message||!payload.cta_url){$('promoStatus').textContent='Titre, message et URL obligatoires.';return}const id=$('promoId').value;const {error}=id?await sb.from('promo_campaigns').update(payload).eq('id',id):await sb.from('promo_campaigns').insert(payload);if(error){$('promoStatus').textContent=error.message;return}toast('Campagne enregistrée');resetPromo();refreshAll()}$('savePromoBtn').onclick=savePromo;async function deletePromo(id){if(!confirm('Supprimer cette campagne ?'))return;const {error}=await sb.from('promo_campaigns').delete().eq('id',id);if(error)return toast(error.message);toast('Campagne supprimée');resetPromo();refreshAll()}$('deletePromoBtn').onclick=()=>$('promoId').value&&deletePromo($('promoId').value);$('runPromoBtn').onclick=async()=>{const b=$('runPromoBtn');b.disabled=true;b.textContent='Envoi...';const {data,error}=await sb.functions.invoke('rlx-promo-worker',{body:{manual:true}});b.disabled=false;b.textContent='Lancer maintenant';if(error)return toast(error.message);toast('Worker promo : '+JSON.stringify(data));refreshAll()};
+function renderContent(){const card=(x,type)=>'<div class="mini-card"><b>'+esc(x.title)+'</b><span>'+esc(x.category||x.slug||'')+'</span><small>'+esc(x.description||'')+'</small><button data-toggle-active="'+type+'|'+(x.slug||x.id)+'|'+x.active+'">'+(x.active?'Désactiver':'Activer')+'</button></div>';$('coursesAdmin').innerHTML=state.courses.map(x=>card(x,'training_courses')).join('')||'<div class="empty">Aucune formation.</div>';$('lamarAdmin').innerHTML=state.lamar.map(x=>card(x,'lamarshop_categories')).join('')||'<div class="empty">Aucune catégorie.</div>';$('videosAdmin').innerHTML=state.videos.map(x=>card(x,'video_sections')).join('')||'<div class="empty">Aucune section.</div>';document.querySelectorAll('[data-toggle-active]').forEach(b=>b.onclick=async()=>{const [tableName,slug,active]=b.dataset.toggleActive.split('|');const {error}=await sb.from(tableName).update({active:active!=='true',updated_at:new Date().toISOString()}).eq('slug',slug);if(error)return toast(error.message);refreshAll()})}
+function renderReviews(){const q=($('reviewSearch')?.value||'').toLowerCase(),rows=state.reviews.filter(x=>(x.display_name+' '+x.comment).toLowerCase().includes(q));$('reviewsList').innerHTML=rows.map(x=>'<article class="card"><div class="card-head"><div><b>'+esc(x.display_name)+'</b><div class="meta">'+x.rating+'/5 · '+fmt(x.created_at)+'</div></div><span class="pill '+(x.approved?'good':'warn')+'">'+(x.approved?'Publié':'En attente')+'</span></div><div>'+esc(x.comment)+'</div><div class="card-actions"><button data-review-toggle="'+x.id+'" data-approved="'+x.approved+'">'+(x.approved?'Retirer':'Publier')+'</button><button class="danger" data-review-delete="'+x.id+'">Supprimer</button></div></article>').join('')||'<div class="empty">Aucun avis.</div>';document.querySelectorAll('[data-review-toggle]').forEach(b=>b.onclick=()=>updateReview(b.dataset.reviewToggle,b.dataset.approved!=='true'));document.querySelectorAll('[data-review-delete]').forEach(b=>b.onclick=()=>removeRow('reviews',b.dataset.reviewDelete,'cet avis'))}$('reviewSearch').oninput=renderReviews;async function updateReview(id,approved){const {error}=await sb.from('reviews').update({approved}).eq('id',id);if(error)return toast(error.message);refreshAll()}
+function renderOrders(){const q=($('orderSearch')?.value||'').toLowerCase(),rows=state.orders.filter(x=>(x.order_ref+' '+x.customer_name+' '+x.product_slug).toLowerCase().includes(q));$('ordersList').innerHTML=rows.map(x=>'<article class="card"><div class="card-head"><div><b>'+esc(x.order_ref)+'</b><div class="meta">'+esc(x.customer_name)+' · '+fmt(x.created_at)+'</div></div><b>'+Number(x.amount_eur).toFixed(2)+' €</b></div><div>'+esc(x.product_slug)+' · '+esc(x.payment_method)+'</div><div class="card-actions"><select data-order-status="'+x.id+'">'+['pending','payment_requested','paid','cancelled','refunded'].map(s=>'<option '+(s===x.status?'selected':'')+'>'+s+'</option>').join('')+'</select><button class="danger" data-order-delete="'+x.id+'">Supprimer</button></div></article>').join('')||'<div class="empty">Aucune commande.</div>';document.querySelectorAll('[data-order-status]').forEach(s=>s.onchange=()=>updateStatus('orders',s.dataset.orderStatus,s.value));document.querySelectorAll('[data-order-delete]').forEach(b=>b.onclick=()=>removeRow('orders',b.dataset.orderDelete,'cette commande'))}$('orderSearch').oninput=renderOrders;
+function renderDownloads(){$('downloadsList').innerHTML=table(['Date','Fichier','Pays','Ville','Appareil','Navigateur','OS','Page','Session'],state.downloads.map(x=>[fmt(x.created_at),esc(x.asset_slug||'—'),esc(x.country_name||x.country_code||'—'),esc(x.city||'—'),esc(x.device_type||'—'),esc(x.browser||'—'),esc(x.os||'—'),esc(x.path||'—'),esc((x.session_id||'').slice(0,14))]))}
+function safeJson(v){try{return JSON.stringify(v??{},null,2)}catch{return '{}'}}function parseJson(t,label){try{return JSON.parse(t)}catch(e){throw new Error(label+' : JSON invalide — '+e.message)}}function renderJsonRows(kind){const cfg=kind==='product'?{rows:state.products,list:'productsList',search:'productSearch',count:'productCountLabel',edit:'product-edit',del:'product-delete'}:{rows:state.erp,list:'erpList',search:'erpSearch',count:'erpCountLabel',edit:'erp-edit',del:'erp-delete'};const q=($(cfg.search)?.value||'').toLowerCase(),rows=cfg.rows.filter(x=>(x.id+' '+safeJson(x.data)).toLowerCase().includes(q));$(cfg.count).textContent=rows.length+' élément'+(rows.length>1?'s':'');$(cfg.list).innerHTML=rows.map(x=>'<article class="card json-record"><div class="card-head"><div><b>'+esc(x.id)+'</b><div class="meta">Mis à jour '+fmt(x.updated_at)+'</div></div><span class="pill">JSON</span></div><pre>'+esc(safeJson(x.data))+'</pre><div class="card-actions"><button data-'+cfg.edit+'="'+esc(x.id)+'">Modifier</button><button class="danger" data-'+cfg.del+'="'+esc(x.id)+'">Supprimer</button></div></article>').join('')||'<div class="empty">Aucune donnée.</div>';document.querySelectorAll('[data-'+cfg.edit+']').forEach(b=>b.onclick=()=>openJsonRecord(kind,b.getAttribute('data-'+cfg.edit)));document.querySelectorAll('[data-'+cfg.del+']').forEach(b=>b.onclick=()=>deleteJsonRecord(kind,b.getAttribute('data-'+cfg.del)))}function renderProducts(){renderJsonRows('product')}function renderErp(){renderJsonRows('erp')}function resetJsonEditor(kind){const p=kind==='product',id=$(p?'productId':'erpId'),data=$(p?'productData':'erpData'),del=$(p?'deleteProductBtn':'deleteErpBtn'),title=$(p?'productEditorTitle':'erpEditorTitle'),status=$(p?'productEditorStatus':'erpEditorStatus');id.value='';id.readOnly=false;del.disabled=true;status.textContent='';title.textContent=p?'Nouveau produit':'Nouvel état ERP';data.value=p?'{\n  "name": "Nouveau produit",\n  "price": 0,\n  "currency": "EUR",\n  "active": true\n}':'{\n  "version": 1,\n  "app": "BOCAR GESTION",\n  "state": {}\n}'}function openJsonRecord(kind,id){const p=kind==='product',row=(p?state.products:state.erp).find(x=>x.id===id);if(!row)return;$(p?'productId':'erpId').value=row.id;$(p?'productId':'erpId').readOnly=true;$(p?'productData':'erpData').value=safeJson(row.data);$(p?'deleteProductBtn':'deleteErpBtn').disabled=false;$(p?'productEditorTitle':'erpEditorTitle').textContent=(p?'Produit : ':'ERP State : ')+row.id}async function saveJsonRecord(kind){const p=kind==='product',tableName=p?'products':'erp_state',id=$(p?'productId':'erpId').value.trim(),status=$(p?'productEditorStatus':'erpEditorStatus');if(!id){status.textContent='Identifiant obligatoire.';return}let data;try{data=parseJson($(p?'productData':'erpData').value,p?'Produit':'ERP State')}catch(e){status.textContent=e.message;return}const {error}=await sb.from(tableName).upsert({id,data,updated_at:new Date().toISOString()},{onConflict:'id'});if(error){status.textContent=error.message;return}toast('Sauvegardé');refreshAll();openJsonRecord(kind,id)}async function deleteJsonRecord(kind,id){if(!confirm('Supprimer ?'))return;const {error}=await sb.from(kind==='product'?'products':'erp_state').delete().eq('id',id);if(error)return toast(error.message);resetJsonEditor(kind);refreshAll()}$('productSearch').oninput=renderProducts;$('erpSearch').oninput=renderErp;$('newProductBtn').onclick=()=>resetJsonEditor('product');$('resetProductBtn').onclick=()=>resetJsonEditor('product');$('saveProductBtn').onclick=()=>saveJsonRecord('product');$('deleteProductBtn').onclick=()=>$('productId').value&&deleteJsonRecord('product',$('productId').value);$('newErpBtn').onclick=()=>resetJsonEditor('erp');$('resetErpBtn').onclick=()=>resetJsonEditor('erp');$('saveErpBtn').onclick=()=>saveJsonRecord('erp');$('deleteErpBtn').onclick=()=>$('erpId').value&&deleteJsonRecord('erp',$('erpId').value);
+function renderAudit(){$('auditList').innerHTML=table(['Date','Table','Action','Acteur','Record'],state.audit.map(x=>[fmt(x.created_at),esc(x.source_table),esc(x.action),esc(x.actor_email||'—'),esc(x.record_id||'—')]))}async function updateStatus(tableName,id,status){const {error}=await sb.from(tableName).update({status}).eq('id',id);if(error)return toast(error.message);refreshAll()}async function removeRow(tableName,id,label){if(!confirm('Supprimer '+label+' ?'))return;const {error}=await sb.from(tableName).delete().eq('id',id);if(error)return toast(error.message);refreshAll()}
+$('changePasswordBtn').onclick=async()=>{const p=$('accountNewPassword').value,c=$('accountConfirmPassword').value,s=$('accountPasswordStatus');if(p.length<8){s.textContent='8 caractères minimum.';return}if(p!==c){s.textContent='Les mots de passe ne correspondent pas.';return}s.textContent='Mise à jour…';const {error}=await sb.auth.updateUser({password:p});s.textContent=error?error.message:'Mot de passe changé.'};$('sendResetFromAppBtn').onclick=()=>sendResetEmail($('accountEmail').value,$('accountPasswordStatus'));
+let deferredInstallPrompt=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;$('installAppBtn').hidden=false});$('installAppBtn').onclick=async()=>{if(!deferredInstallPrompt)return toast('Menu navigateur → Installer');deferredInstallPrompt.prompt();deferredInstallPrompt=null;$('installAppBtn').hidden=true};if('serviceWorker'in navigator)navigator.serviceWorker.register('/control-sw.js').catch(()=>{});sb.auth.onAuthStateChange((event)=>{if(event==='PASSWORD_RECOVERY'){showRecovery();return}boot()});boot();
