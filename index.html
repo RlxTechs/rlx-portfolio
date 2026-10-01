@@ -1,181 +1,112 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#080816" />
-  <meta name="description" content="Rlx — portfolio de Mardochée Bossede. Développement, logiciels Windows, 3D, automatisation, vidéo, IA et expériences web." />
-  <title>Rlx — Mardochée Bossede | Dev · 3D · Automation · Digital</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#080816">
+  <meta name="description" content="RLX Kingdom — logiciels, formations, LamarShop, vidéos, jeux, freelance, analytics et outils créatifs.">
+  <title>RLX Kingdom — Apps · Formations · LamarShop · Creator Tools</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2285%22>⚡</text></svg>">
-  <link rel="stylesheet" href="styles.css" />\n  <link rel="stylesheet" href="creator-kit.css" />
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="creator-kit.css">
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script defer src="app.js"></script>\n  <script type="module" src="creator-kit.js"></script>
+  <script defer src="app.js"></script>
+  <script type="module" src="creator-kit.js"></script>
 </head>
 <body>
-  <canvas id="fx"></canvas>
-  <div class="cursor-glow" id="cursorGlow"></div>
-  <div class="noise"></div>
+  <canvas id="fx" aria-hidden="true"></canvas>
+  <div class="noise" aria-hidden="true"></div>
 
   <header class="topbar glass">
-    <a class="brand" href="#top" aria-label="Accueil"><span class="brand-orb">R</span><span>RLX</span></a>
-    <nav>
-      <a href="#projects">Projets</a><a href="#services">Services</a><a href="#shop">Shop</a><a href="#skills">Stack</a><a href="#reviews">Avis</a>
+    <a class="brand" href="#top" aria-label="Accueil RLX"><span class="brand-orb">R</span><span>RLX</span></a>
+    <button id="menuBtn" class="menu-btn" aria-label="Menu">☰</button>
+    <nav id="mainNav">
+      <a href="#projects">Projets</a><a href="#software">Logiciels</a><a href="#games">Jeux</a><a href="#trainings">Formations</a><a href="#lamarshop">LamarShop</a><a href="#watch">Vidéos</a><a href="#contest">Concours</a><a href="#freelance">Freelance</a><a href="#reviews">Avis</a>
     </nav>
-    <a class="pill" href="mailto:bossedemardochee@gmail.com">Collaborer ↗</a>
+    <button class="pill" id="accountBtn">Compte</button>
   </header>
 
   <main id="top">
     <section class="hero section">
       <div class="hero-copy reveal">
-        <div class="eyebrow">MARDOCHEE BOSSEDE · PSEUDO RLX</div>
-        <h1>Je transforme des idées en <span>outils vivants.</span></h1>
-        <p class="lead">Développeur, gamer et créateur digital. Je conçois des logiciels Windows, expériences 3D, automatisations, outils IA, sites web, vidéos et produits numériques.</p>
-        <div class="hero-actions">
-          <a class="cta primary magnetic" href="#featured">Voir ScreenDrop</a>
-          <a class="cta ghost magnetic" href="#projects">Explorer mes projets</a>
-        </div>
-        <div class="microstats">
-          <div><b>3+ ans</b><span>expérience projets</span></div>
-          <div><b>Windows · Web · 3D</b><span>multi-domaines</span></div>
-          <div><b>Build → Ship</b><span>prototype jusqu'au produit</span></div>
-        </div>
+        <div class="eyebrow">RLX KINGDOM · SOFTWARE · SHOP · TRAINING</div>
+        <h1>Un seul portail pour créer, vendre, apprendre et grandir.</h1>
+        <p class="lead">Logiciels Windows, outils 3D, formations, LamarShop, vidéos, jeux, commandes Chine, cartes cadeaux et services freelance — tout relié au cloud RLX.</p>
+        <div class="hero-actions"><a class="cta primary" href="#lamarshop">Explorer LamarShop</a><a class="cta ghost" href="#trainings">Voir les formations</a><button class="cta ghost" id="heroLoginBtn">Se connecter</button></div>
+        <div class="microstats"><div><b>Compte RLX</b><span>Email/code + Google</span></div><div><b>Promos opt-in</b><span>Offres ciblées</span></div><div><b>Analytics privés</b><span>Admin seulement</span></div></div>
       </div>
 
       <div class="hero-art reveal">
         <div class="blister-card creator-card">
           <div class="blister-title">RLX CREATOR KIT</div>
-          <div class="creator-viewer-shell" id="creatorDrop">
-            <div id="creatorViewer" class="creator-viewer"></div>
-            <div id="creatorEmpty" class="creator-empty">
-              <b>Ton skin 3D ici</b>
-              <span>GLB / GLTF riggé</span>
-            </div>
-            <div class="creator-badge" id="creatorAnimStatus">Aucun skin chargé</div>
-          </div>
-          <div class="creator-actions">
-            <label class="creator-upload">Charger un skin<input id="creatorSkinInput" type="file" accept=".glb,.gltf,model/gltf-binary,model/gltf+json" hidden></label>
-            <button type="button" id="creatorNextAnim">Animation suivante</button>
-            <button type="button" id="creatorResetView">Recentrer</button>
-          </div>
-          <p class="creator-note">Le skin choisi reste enregistré dans ce navigateur. Les clips intégrés jouent automatiquement au hasard ; si le GLB n'en contient pas, le rig reçoit des mouvements procéduraux.</p>
-          <div class="kit-grid">
-            <div class="kit-chip">3D</div><div class="kit-chip">RIG</div><div class="kit-chip">ANIM</div><div class="kit-chip">GLB</div>
-          </div>
+          <div class="creator-viewer-shell" id="creatorDrop"><div id="creatorViewer" class="creator-viewer"></div><div id="creatorEmpty" class="creator-empty"><b>Ton skin 3D ici</b><span>GLB / GLTF riggé</span></div><div class="creator-badge" id="creatorAnimStatus">Aucun skin chargé</div></div>
+          <div class="creator-actions"><label class="creator-upload">Charger un skin<input id="creatorSkinInput" type="file" accept=".glb,.gltf,model/gltf-binary,model/gltf+json" hidden></label><button type="button" id="creatorNextAnim">Animation suivante</button><button type="button" id="creatorResetView">Recentrer</button></div>
+          <p class="creator-note">Le skin choisi reste dans ce navigateur. Tu peux aussi publier un GLB dans GitHub pour le charger automatiquement depuis le cloud.</p>
+          <div class="kit-grid"><div class="kit-chip">3D</div><div class="kit-chip">RIG</div><div class="kit-chip">ANIM</div><div class="kit-chip">GLB</div></div>
           <div class="blister-footer">CREATOR · RIG · ANIMATION</div>
         </div>
       </div>
     </section>
 
-    <section id="featured" class="section featured reveal">
-      <div class="section-head"><span class="eyebrow">OUTIL VEDETTE</span><h2>ChatGPT ScreenDrop V5</h2></div>
-      <div class="product-stage glass">
-        <div class="screen-orb">
-          <div class="screen-inner"><span>⇧ K</span><small>CAPTURE → CHATGPT</small></div>
-        </div>
-        <div class="product-copy">
-          <p class="kicker">Windows · PowerShell 5.1 · sans dépendances externes</p>
-          <h3>Une capture d'écran, un raccourci, zéro détour.</h3>
-          <p>Appuie sur <b>Shift + K</b> : ScreenDrop capture le moniteur sous la souris, retrouve l'onglet ChatGPT utilisé récemment dans Chrome, colle l'image dans la conversation sans l'envoyer automatiquement, puis revient vers ta fenêtre de travail.</p>
-          <div class="feature-chips"><span>Multi-écran</span><span>Restauration fenêtre</span><span>Démarrage Windows</span><span>Journal diagnostic</span><span>Chrome UI Automation</span></div>
-          <div class="download-row">
-            <a class="cta primary" href="downloads/ChatGPT_ScreenDrop_ShiftK_V5.zip" download>Télécharger V5 (.zip)</a>
-            <button class="cta ghost" data-modal="screendrop-details">Détails techniques</button>
-          </div>
-          <div class="hash">SHA-256 : <code>fe5dec7933b2a9f0c1274f7e9285341ea00693e66677c0b25f07dddbdfd2532c</code></div>
-        </div>
+    <section id="account" class="section reveal">
+      <div class="section-head"><span class="eyebrow">COMPTE RLX</span><h2>Connexion client</h2><p>Les visiteurs peuvent créer un compte, se connecter avec un code email ou Google, accepter les promos et retrouver leurs offres.</p></div>
+      <div class="account-zone glass">
+        <div><h3 id="accountTitle">Connecte-toi à RLX</h3><p id="accountText">Entre ton email pour recevoir un code/lien de connexion. Tu peux aussi utiliser Google si le provider est activé dans Supabase.</p></div>
+        <div id="accountPanel" class="account-panel"></div>
+      </div>
+    </section>
+
+    <section id="software" class="section reveal">
+      <div class="section-head"><span class="eyebrow">MES LOGICIELS</span><h2>Outils RLX à télécharger ou utiliser en ligne</h2></div>
+      <div class="project-grid">
+        <article class="project-card glass"><span class="tag">WINDOWS</span><h3>ScreenDrop V5</h3><p>Capture Shift+K → ChatGPT, sans API, avec workflow local.</p><div class="download-row"><a class="cta primary" href="downloads/ChatGPT_ScreenDrop_ShiftK_V5.zip" download>Télécharger</a></div></article>
+        <article class="project-card glass"><span class="tag">3D STUDIO</span><h3>BlenderFied</h3><p>Créer, importer, animer, convertir image → relief 3D et exporter GLB.</p><div class="download-row"><a class="cta primary" href="blenderfied.html">Ouvrir le studio</a><button class="cta ghost buy" data-product="blenderfied" data-price="5">Acheter 5 €</button></div></article>
+        <article class="project-card glass"><span class="tag">ADMIN</span><h3>RLX Control</h3><p>Outil privé d’analytics, avis, commandes, utilisateurs et promotions.</p><div class="download-row"><a class="cta ghost" href="control">Espace privé</a></div></article>
       </div>
     </section>
 
     <section id="projects" class="section reveal">
-      <div class="section-head"><span class="eyebrow">LAB / PROJECTS</span><h2>Ce que je construis au quotidien</h2><p>Des outils métier aux environnements 3D temps réel, avec une approche très orientée prototype rapide, interaction et produit installable.</p></div>
+      <div class="section-head"><span class="eyebrow">PROJETS</span><h2>Ce que je construis</h2></div>
       <div class="project-grid">
-        <article class="project-card glass tilt"><span class="tag">ERP · WINDOWS</span><h3>BOCAR GESTION</h3><p>ERP local pour boutique, immobilier et chantiers : caisse, ventes, stock, dettes, cautions, commandes, historiques, sauvegardes et traçabilité.</p><div class="stack">C# · .NET · Windows</div></article>
-        <article class="project-card glass tilt"><span class="tag">E-COMMERCE</span><h3>Brazza Store</h3><p>Boutique web avec panier WhatsApp, profils clients, fidélité, catalogue, livraison locale et données connectées au cloud.</p><div class="stack">HTML · CSS · JS · Supabase · Netlify</div></article>
-        <article class="project-card glass tilt"><span class="tag">3D STUDIO</span><h3>RLX 3D Native Studio</h3><p>Éditeur 3D Windows : import FBX/GLB/OBJ, monde éditable, animations, caméra, éclairage, timeline, multi-acteurs, audio et export vidéo.</p><div class="stack">C# · .NET · PBR · 3D pipelines</div></article>
-        <article class="project-card glass tilt"><span class="tag">GAMEPLAY 3D</span><h3>Bank Drop / Money Rain</h3><p>Expérience de rebond et rythme : plateformes textuelles, gravité variable, segments, rails, figures, effets lumineux et timeline créative.</p><div class="stack">JavaScript · WebGL · Three.js</div></article>
-        <article class="project-card glass tilt"><span class="tag">GAME / ENGINE</span><h3>CodeRush</h3><p>Prototype de jeu 3D natif Windows avec launcher, mouvements, caméra, zones de jeu, véhicules et expérimentation moteur graphique.</p><div class="stack">C# · .NET · Windows</div></article>
-        <article class="project-card glass tilt"><span class="tag">AI WORKFLOW</span><h3>ScreenDrop Agent Workflow</h3><p>Workflow d'assistance IA sans clé API : capture, routage vers ChatGPT, automatisation locale et contrôle du contexte de travail.</p><div class="stack">PowerShell · Win32 · UI Automation</div></article>
-        <article class="project-card glass tilt"><span class="tag">WEB APP</span><h3>SkyCrash Live</h3><p>Prototype temps réel avec comptes, données cloud, outils d'administration, suivi d'activité et scénarios de démonstration de fiabilité.</p><div class="stack">JavaScript · Supabase · Realtime</div></article>
-        <article class="project-card glass tilt"><span class="tag">CREATOR TOOL</span><h3>Youmiee Studio Concepts</h3><p>Outils et concepts pour shorts : animation 3D, voix off IA, montage rythmé, transitions, hooks et expériences visuelles verticales.</p><div class="stack">AI · Motion · 3D · Video</div></article>
+        <article class="project-card glass"><span class="tag">ERP</span><h3>BOCAR GESTION</h3><p>Gestion boutique, immobilier, chantiers, caisses, stock, dettes et historiques.</p></article>
+        <article class="project-card glass"><span class="tag">E-COMMERCE</span><h3>Brazza Store</h3><p>Catalogue, panier WhatsApp, profils clients, livraison locale et fidélité.</p></article>
+        <article class="project-card glass"><span class="tag">3D</span><h3>RLX Native Studio</h3><p>Éditeur 3D Windows natif, timeline, multi-acteurs, lumière, caméra et export vidéo.</p></article>
+        <article class="project-card glass"><span class="tag">LIVE</span><h3>SkyCrash Live</h3><p>Prototype cloud temps réel, admin, points, crash contrôlé et statistiques.</p></article>
       </div>
     </section>
 
-    <section id="services" class="section split reveal">
-      <div class="section-head"><span class="eyebrow">SERVICES</span><h2>Je peux produire avec toi</h2></div>
-      <div class="service-cloud">
-        <span>Logiciels Windows</span><span>Applications web</span><span>Projets 3D</span><span>Lyrics videos</span><span>Vidéos YouTube</span><span>Voix off IA</span><span>Automatisations</span><span>E-commerce</span><span>Prototypes de jeux</span><span>Motion design</span><span>Interfaces UI/UX</span><span>Outils internes</span>
-      </div>
+    <section id="trainings" class="section reveal">
+      <div class="section-head"><span class="eyebrow">FORMATIONS</span><h2>Formations RLX prêtes à dispenser</h2><p>Informatique, IA, automatisation, marketing digital, réseaux, animation et anglais pratique.</p></div>
+      <div id="coursesGrid" class="course-grid"><div class="empty-state">Chargement des formations...</div></div>
+      <div class="download-row center"><a class="cta ghost" href="downloads/RLX_Formations_Catalogue.pptx" download>Télécharger le catalogue PowerPoint</a></div>
     </section>
 
-    <section id="shop" class="section reveal">
-      <div class="section-head"><span class="eyebrow">RLX SHOP</span><h2>Produits numériques</h2><p>Les commandes sont enregistrées dans le cloud. Les passerelles de paiement réelles nécessitent ensuite les identifiants marchands du prestataire choisi.</p></div>
-      <div class="shop-grid">
-        <article class="shop-card glass"><div class="shop-visual blender">B</div><div><span class="tag">SOFTWARE</span><h3>BlenderFied</h3><p>Interface simplifiée pour créer et animer plus facilement qu'avec un workflow Blender classique.</p><div class="price">5 €</div><div class="download-row"><a class="cta ghost" href="blenderfied.html">Essayer le Studio</a><button class="cta primary buy" data-product="blenderfied" data-price="5">Acheter</button></div></div></article>
-        <article class="shop-card glass"><div class="shop-visual vb">V</div><div><span class="tag">GIFT CARD</span><h3>Carte cadeau V-Bucks</h3><p>Choisis une valeur et crée ta demande de commande.</p><div class="variants"><button class="variant active" data-price="5">5 €</button><button class="variant" data-price="10">10 €</button></div><button class="cta primary buy" data-product="vbucks" data-price="5">Commander</button></div></article>
-      </div>
+    <section id="lamarshop" class="section reveal">
+      <div class="section-head"><span class="eyebrow">LAMARSHOP</span><h2>Boutique officielle RLX</h2><p>Nourriture, vêtements, électroménager, papeterie, informatique, gadgets, maison, énergie solaire, cartes cadeaux, commandes Chine et logiciels.</p></div>
+      <div id="lamarGrid" class="lamar-grid"><div class="empty-state">Chargement LamarShop...</div></div>
+      <div class="giveaway glass"><div><span class="eyebrow">CADEAUX À GAGNER</span><h3>Connecte-toi et achète au moins 10 €</h3><p>Une carte cadeau ou réduction spéciale peut être débloquée après achat éligible. Les règles sont visibles dans RLX Control.</p></div><button class="cta primary" id="giftLoginBtn">Participer</button></div>
     </section>
 
-    <section id="skills" class="section reveal">
-      <div class="section-head"><span class="eyebrow">STACK</span><h2>Langages & outils déjà utilisés</h2></div>
-      <div class="skills-wrap glass">
-        <div class="skill-group"><h3>Langages</h3><div class="skill-pills"><span>HTML5</span><span>CSS3</span><span>JavaScript</span><span>TypeScript</span><span>C#</span><span>PowerShell</span><span>Batch</span><span>SQL</span><span>JSON</span></div></div>
-        <div class="skill-group"><h3>Plateformes / techno</h3><div class="skill-pills"><span>.NET</span><span>Windows</span><span>Supabase</span><span>PostgreSQL</span><span>Netlify</span><span>Git</span><span>GitHub</span><span>Three.js</span><span>WebGL</span><span>REST APIs</span><span>UI Automation</span></div></div>
-        <div class="skill-group"><h3>3D & création</h3><div class="skill-pills"><span>FBX</span><span>GLB / GLTF</span><span>OBJ</span><span>BVH</span><span>PBR</span><span>Animation</span><span>Timeline</span><span>Motion Design</span><span>AI media workflows</span></div></div>
-      </div>
+    <section id="watch" class="section reveal">
+      <div class="section-head"><span class="eyebrow">WATCH ONLINE FREE</span><h2>Vidéos & contenus</h2><p>Sections organisées pour animés, mangas, films, jeux vidéo/letsplay et LamarShop TV. La zone mature est contrôlée 18+ et réservée au contenu légal uniquement.</p></div>
+      <div id="videoGrid" class="watch-grid"><div class="empty-state">Chargement vidéos...</div></div>
     </section>
 
-    <section class="section reveal">
-      <div class="section-head"><span class="eyebrow">PARCOURS</span><h2>Formation & diplômes</h2></div>
-      <div class="timeline glass">
-        <div><b>Parcours informatique — Epitech</b><span>Développement, projets logiciels et culture produit.</span></div>
-        <div><b>Baccalauréat Économie — TSECO</b><span>Formation économique et gestion.</span></div>
-        <div><b>Baccalauréat A4 — Espagnol</b><span>Formation littéraire et langues.</span></div>
-        <div><b>BEPC / DEF</b><span>Cycle secondaire.</span></div>
-        <div><b>CEP</b><span>Cycle primaire.</span></div>
-      </div>
-      <p class="small-note">Les certificats spécifiques peuvent être ajoutés ici dès qu'ils sont fournis en PDF ou image.</p>
-    </section>
+    <section id="games" class="section reveal"><div class="section-head"><span class="eyebrow">JEUX</span><h2>Game Lab RLX</h2></div><div class="service-cloud"><span>Open worlds 3D</span><span>Football anime-like</span><span>Swordash-like</span><span>Runner 3D</span><span>FPS expérimental</span><span>Sandbox créatif</span></div></section>
+
+    <section id="contest" class="section reveal"><div class="section-head"><span class="eyebrow">CONCOURS</span><h2>Défis, cadeaux et offres spéciales</h2></div><div class="glass contest-box"><h3>Challenge RLX</h3><p>Des concours pourront récompenser les clients connectés : réductions, cartes cadeaux, accès logiciel ou bonus formation.</p><button class="cta primary" id="contestLoginBtn">Me connecter pour participer</button></div></section>
+
+    <section id="freelance" class="section reveal"><div class="section-head"><span class="eyebrow">FREELANCING</span><h2>Engagez-moi</h2><p>Sites web, logiciels Windows, IA, automatisation, vidéos, 3D, e-commerce, dashboards, outils métiers et prototypes.</p></div><div class="final-cta glass"><h3>Tu as une idée à construire ?</h3><p>Je peux partir d’un simple croquis et aller jusqu’au prototype fonctionnel.</p><a class="cta primary" href="mailto:bossedemardochee@gmail.com?subject=Projet%20RLX">bossedemardochee@gmail.com ↗</a></div></section>
 
     <section id="reviews" class="section reveal">
-      <div class="section-head"><span class="eyebrow">COMMUNAUTÉ</span><h2>Avis utilisateurs</h2><p>Les avis sont envoyés au cloud puis publiés après validation.</p></div>
-      <div class="review-layout">
-        <form id="reviewForm" class="glass form-card">
-          <input name="display_name" placeholder="Ton nom / pseudo" minlength="2" maxlength="60" required>
-          <div class="stars" id="stars" aria-label="Note"><button type="button" data-star="1">★</button><button type="button" data-star="2">★</button><button type="button" data-star="3">★</button><button type="button" data-star="4">★</button><button type="button" data-star="5">★</button></div>
-          <input type="hidden" name="rating" value="5">
-          <textarea name="comment" placeholder="Ton avis..." minlength="2" maxlength="800" required></textarea>
-          <button class="cta primary" type="submit">Envoyer mon avis</button>
-          <p id="reviewStatus" class="form-status"></p>
-        </form>
-        <div id="reviewList" class="review-list"><div class="empty-state">Les avis validés apparaîtront ici.</div></div>
-      </div>
-    </section>
-
-    <section class="section final-cta reveal">
-      <div class="glass"><span class="eyebrow">COLLAB / FREELANCE / BUILD</span><h2>Tu as une idée à construire ?</h2><p>Parle-moi du problème, du produit ou du concept. Je peux partir d'un simple croquis et aller jusqu'au prototype fonctionnel.</p><a class="cta primary" href="mailto:bossedemardochee@gmail.com?subject=Collaboration%20avec%20Rlx">bossedemardochee@gmail.com ↗</a></div>
+      <div class="section-head"><span class="eyebrow">AVIS</span><h2>Communauté RLX</h2><p>Les avis sont envoyés au cloud puis publiés après validation.</p></div>
+      <div class="review-layout"><form id="reviewForm" class="glass form-card"><input name="display_name" placeholder="Ton nom / pseudo" minlength="2" maxlength="60" required><div class="stars" id="stars"><button type="button" data-star="1">★</button><button type="button" data-star="2">★</button><button type="button" data-star="3">★</button><button type="button" data-star="4">★</button><button type="button" data-star="5">★</button></div><input type="hidden" name="rating" value="5"><textarea name="comment" placeholder="Ton avis..." minlength="2" maxlength="800" required></textarea><button class="cta primary" type="submit">Envoyer mon avis</button><p id="reviewStatus" class="form-status"></p></form><div id="reviewList" class="review-list"><div class="empty-state">Les avis validés apparaîtront ici.</div></div></div>
     </section>
   </main>
 
-  <footer><span>© 2026 Rlx / Mardochée Bossede</span><a href="mailto:bossedemardochee@gmail.com">Contact</a></footer>
+  <footer><span>© 2026 RLX Kingdom</span><a href="mailto:bossedemardochee@gmail.com">Contact</a></footer>
 
-  <dialog id="screendrop-details" class="modal glass">
-    <button class="modal-close" aria-label="Fermer">×</button><h3>ScreenDrop V5 — fonctionnement</h3>
-    <ul><li>Raccourci global Shift + K.</li><li>Capture le moniteur situé sous le curseur.</li><li>Détecte le dernier onglet ChatGPT visité dans Chrome via UI Automation.</li><li>Colle l'image sans envoyer le message.</li><li>Préserve l'état de la fenêtre Chrome et revient vers l'application précédente.</li><li>Démarre automatiquement avec Windows et écrit un journal local de diagnostic.</li></ul>
-  </dialog>
-
-  <dialog id="checkoutModal" class="modal glass checkout-modal">
-    <button class="modal-close" aria-label="Fermer">×</button>
-    <h3>Créer une commande</h3>
-    <form id="checkoutForm">
-      <input type="hidden" name="product_slug"><input type="hidden" name="amount_eur">
-      <label>Produit<input name="product_label" readonly></label>
-      <label>Nom<input name="customer_name" required minlength="2"></label>
-      <label>Email<input type="email" name="email" placeholder="facultatif"></label>
-      <label>Téléphone<input name="phone" placeholder="facultatif"></label>
-      <label>Paiement<select name="payment_method" required><option>Visa / Mastercard</option><option>Airtel Money</option><option>MTN Mobile Money</option><option>Orange Money</option><option>Wave</option><option>Bitcoin</option></select></label>
-      <div class="payment-note">La commande est bien enregistrée, mais le débit réel ne peut être activé qu'après connexion d'un compte marchand / passerelle de paiement.</div>
-      <button class="cta primary" type="submit">Enregistrer la commande</button><p class="form-status" id="checkoutStatus"></p>
-    </form>
-  </dialog>
+  <dialog id="checkoutModal" class="modal glass checkout-modal"><button class="modal-close" aria-label="Fermer">×</button><h3>Créer une commande</h3><form id="checkoutForm"><input type="hidden" name="product_slug"><input type="hidden" name="amount_eur"><label>Produit<input name="product_label" readonly></label><label>Nom<input name="customer_name" required minlength="2"></label><label>Email<input type="email" name="email" placeholder="facultatif"></label><label>Téléphone<input name="phone" placeholder="facultatif"></label><label>Paiement<select name="payment_method" required><option>Visa / Mastercard</option><option>Airtel Money</option><option>MTN Mobile Money</option><option>Orange Money</option><option>Wave</option><option>Bitcoin</option></select></label><div class="payment-note">La commande est enregistrée. Le paiement réel dépendra de la passerelle marchande connectée.</div><button class="cta primary" type="submit">Enregistrer la commande</button><p class="form-status" id="checkoutStatus"></p></form></dialog>
+  <dialog id="ageGate" class="modal glass"><button class="modal-close" aria-label="Fermer">×</button><h3>Contrôle d’âge</h3><p>Cette section est réservée aux personnes majeures et au contenu légal uniquement.</p><button id="confirmAge" class="cta primary">J’ai 18 ans ou plus</button></dialog>
 </body>
 </html>
