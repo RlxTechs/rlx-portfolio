@@ -1,142 +1,129 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#090912">
-  <title>BlenderFied Studio — RLX</title>
-  <link rel="stylesheet" href="blenderfied.css">
-  <script type="importmap">
-  {
-    "imports": {
-      "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
-      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
-    }
-  }
-  </script>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090912">
+<title>BlenderFied V2 — RLX Studio</title>
+<link rel="stylesheet" href="blenderfied.css">
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"}}</script>
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand"><span class="logo">B</span><div><b>BlenderFied</b><small>RLX Studio · MVP</small></div></div>
-    <div class="top-actions">
-      <button id="newProject">Nouveau</button>
-      <button id="saveProject">Sauvegarder</button>
-      <label class="button">Ouvrir<input id="openProject" type="file" accept=".json,application/json" hidden></label>
-      <button id="exportGlb" class="primary">Exporter GLB</button>
-      <a href="index.html#shop" class="button">RLX Shop</a>
-    </div>
-  </header>
+<header class="topbar">
+ <div class="brand"><span class="logo">B</span><div><b>BlenderFied</b><small>RLX Studio · V2</small></div></div>
+ <div class="save-state"><i id="saveDot"></i><span id="autosaveState">Autosave prêt</span></div>
+ <div class="top-actions">
+  <button id="undoBtn" title="Annuler">↶</button><button id="redoBtn" title="Rétablir">↷</button>
+  <button id="newProject">Nouveau</button><button id="saveProject">Télécharger projet</button>
+  <label class="button">Ouvrir<input id="openProject" type="file" accept=".json,application/json" hidden></label>
+  <button id="exportGlb" class="primary">Exporter GLB</button>
+  <button id="shotBtn">Capture PNG</button><a href="index.html#shop" class="button">RLX Shop</a>
+ </div>
+</header>
 
-  <main class="workspace">
-    <aside class="left-panel panel">
-      <section>
-        <div class="section-title">Ajouter</div>
-        <div class="asset-grid">
-          <button data-add="cube">Cube</button>
-          <button data-add="sphere">Sphère</button>
-          <button data-add="cylinder">Cylindre</button>
-          <button data-add="plane">Plan</button>
-          <button data-add="light">Lumière</button>
-          <button data-add="camera">Caméra</button>
-        </div>
-      </section>
+<main class="workspace">
+<aside class="left-panel panel">
+ <div class="side-tabs">
+  <button class="side-tab active" data-panel="assets">Assets</button><button class="side-tab" data-panel="create">Créer</button><button class="side-tab" data-panel="script">Script</button>
+ </div>
 
-      <section>
-        <div class="section-title">Importer</div>
-        <label class="dropzone" id="dropzone">
-          <b>GLB · GLTF · FBX · OBJ</b>
-          <span>Glisse un modèle ici ou clique</span>
-          <input id="modelInput" type="file" accept=".glb,.gltf,.fbx,.obj" hidden>
-        </label>
-      </section>
+ <div class="side-panel active" id="side-assets">
+  <section><div class="section-title">Scènes prêtes</div><div class="preset-grid">
+   <button data-scene="studio">Studio</button><button data-scene="forest">Forêt</button><button data-scene="city">Ville</button><button data-scene="desert">Désert</button><button data-scene="interior">Intérieur</button><button data-scene="empty">Vide</button>
+  </div></section>
+  <section><div class="section-title">Décors / prefabs</div><div class="asset-grid">
+   <button data-prefab="tree">🌳 Arbre</button><button data-prefab="rock">🪨 Rocher</button><button data-prefab="building">🏢 Bâtiment</button><button data-prefab="house">🏠 Maison</button><button data-prefab="road">🛣 Route</button><button data-prefab="lamp">💡 Lampadaire</button><button data-prefab="stairs">▤ Escalier</button><button data-prefab="wall">▥ Mur</button>
+  </div></section>
+  <section><div class="section-title">Éclairage</div><div class="preset-grid">
+   <button data-lighting="day">Jour</button><button data-lighting="sunset">Sunset</button><button data-lighting="night">Nuit</button><button data-lighting="studio">Studio</button>
+  </div></section>
+  <section class="scene-section"><div class="section-title row"><span>Scène</span><button id="duplicateBtn" title="Dupliquer">⧉</button></div><div id="sceneTree" class="scene-tree"></div></section>
+ </div>
 
-      <section class="scene-section">
-        <div class="section-title row"><span>Scène</span><button id="duplicateBtn" title="Dupliquer">⧉</button></div>
-        <div id="sceneTree" class="scene-tree"></div>
-      </section>
-    </aside>
+ <div class="side-panel" id="side-create">
+  <section><div class="section-title">Primitives</div><div class="asset-grid">
+   <button data-add="cube">Cube</button><button data-add="sphere">Sphère</button><button data-add="cylinder">Cylindre</button><button data-add="plane">Plan</button><button data-add="light">Point light</button><button data-add="spot">Spot</button><button data-add="camera">Caméra</button><button data-add="group">Groupe</button>
+  </div></section>
+  <section><div class="section-title">Importer 3D</div><label class="dropzone" id="dropzone"><b>GLB · GLTF · FBX · OBJ</b><span>Glisse un modèle ou clique</span><input id="modelInput" type="file" accept=".glb,.gltf,.fbx,.obj" hidden></label></section>
+  <section><div class="section-title">2D → 3D</div>
+   <label class="dropzone compact">Image JPG / PNG<input id="imageInput" type="file" accept="image/png,image/jpeg,image/webp" hidden></label>
+   <label class="range-label">Profondeur relief <input id="reliefDepth" type="range" min="0.05" max="2" step="0.05" value=".55"><span id="reliefDepthValue">0.55</span></label>
+   <div class="asset-grid"><button id="imagePlaneBtn">Image plane</button><button id="reliefBtn" class="primary">Relief 3D</button></div>
+   <p class="help">Le relief utilise la luminosité de l’image comme profondeur : rapide, local et exportable en GLB.</p>
+  </section>
+  <section><div class="section-title">Animation rapide</div><div class="asset-grid">
+   <button data-anim="float">Flotter</button><button data-anim="bounce">Rebond</button><button data-anim="spin">Tourner</button><button data-anim="pulse">Pulse</button><button data-anim="orbit">Orbite</button><button data-anim="reset">Effacer keys</button>
+  </div></section>
+ </div>
 
-    <section class="center">
-      <div class="viewport-toolbar">
-        <div class="tool-group">
-          <button data-mode="translate" class="active" title="Déplacer (G)">Déplacer</button>
-          <button data-mode="rotate" title="Rotation (R)">Rotation</button>
-          <button data-mode="scale" title="Échelle (S)">Échelle</button>
-        </div>
-        <div class="tool-group">
-          <button id="toggleGrid" class="active">Grille</button>
-          <button id="toggleSnap">Snap 0.5</button>
-          <button id="focusBtn">Cadrer (F)</button>
-        </div>
-        <div class="tool-group">
-          <button data-view="front">Face</button>
-          <button data-view="side">Côté</button>
-          <button data-view="top">Dessus</button>
-        </div>
-      </div>
-      <div id="viewport"></div>
-      <div class="viewport-hint">G déplacer · R rotation · S échelle · Suppr supprimer · Ctrl+D dupliquer · F cadrer</div>
-    </section>
+ <div class="side-panel" id="side-script">
+  <section><div class="section-title">Script rapide BlenderFied</div>
+   <select id="scriptPreset"><option value="">Exemple…</option><option value="forest">Mini forêt</option><option value="city">Rue</option><option value="product">Studio produit</option><option value="animation">Animation</option></select>
+   <textarea id="scriptBox" spellcheck="false" placeholder="# Une commande par ligne
+cube 0 1 0
+color #8b5cff
+move 0 2 0
+key 0
+move 0 4 0
+key 2"></textarea>
+   <button id="runScript" class="primary wide">▶ Exécuter</button>
+   <div class="script-help">Commandes : cube, sphere, tree, rock, building, light, select, move, rotate, scale, color, duplicate, key, anim, scene, lighting.</div>
+  </section>
+ </div>
+</aside>
 
-    <aside class="right-panel panel">
-      <div class="section-title">Inspecteur</div>
-      <div id="emptyInspector" class="empty">Sélectionne un objet.</div>
-      <div id="inspector" hidden>
-        <label>Nom<input id="objName" type="text"></label>
+<section class="center">
+ <div class="viewport-toolbar">
+  <div class="tool-group"><button data-mode="translate" class="active">Déplacer</button><button data-mode="rotate">Rotation</button><button data-mode="scale">Échelle</button></div>
+  <div class="tool-group"><button id="toggleGrid" class="active">Grille</button><button id="toggleSnap">Snap</button><button id="focusBtn">Cadrer</button></div>
+  <div class="tool-group"><button data-view="front">Face</button><button data-view="side">Côté</button><button data-view="top">Dessus</button><button data-view="perspective">Perspective</button></div>
+ </div>
+ <div id="viewport"></div>
+ <div class="viewport-hint" id="shortcutHint">G déplacer · R rotation · S échelle · Suppr supprimer · D dupliquer · F cadrer · K keyframe</div>
+</section>
 
-        <div class="prop-title">Position</div>
-        <div class="xyz">
-          <label>X<input id="px" type="number" step="0.1"></label>
-          <label>Y<input id="py" type="number" step="0.1"></label>
-          <label>Z<input id="pz" type="number" step="0.1"></label>
-        </div>
+<aside class="right-panel panel">
+ <div class="inspector-tabs"><button class="inspector-tab active" data-inspector="object">Objet</button><button class="inspector-tab" data-inspector="world">Monde</button><button class="inspector-tab" data-inspector="settings">Réglages</button></div>
 
-        <div class="prop-title">Rotation °</div>
-        <div class="xyz">
-          <label>X<input id="rx" type="number" step="1"></label>
-          <label>Y<input id="ry" type="number" step="1"></label>
-          <label>Z<input id="rz" type="number" step="1"></label>
-        </div>
+ <div class="inspector-panel active" id="inspect-object">
+  <div class="section-title">Inspecteur</div><div id="emptyInspector" class="empty">Sélectionne un objet.</div>
+  <div id="inspector" hidden>
+   <label>Nom<input id="objName" type="text"></label>
+   <div class="prop-title">Position</div><div class="xyz"><label>X<input id="px" type="number" step=".1"></label><label>Y<input id="py" type="number" step=".1"></label><label>Z<input id="pz" type="number" step=".1"></label></div>
+   <div class="prop-title">Rotation °</div><div class="xyz"><label>X<input id="rx" type="number" step="1"></label><label>Y<input id="ry" type="number" step="1"></label><label>Z<input id="rz" type="number" step="1"></label></div>
+   <div class="prop-title">Échelle</div><div class="xyz"><label>X<input id="sx" type="number" step=".1"></label><label>Y<input id="sy" type="number" step=".1"></label><label>Z<input id="sz" type="number" step=".1"></label></div>
+   <div id="materialPanel"><div class="prop-title">Matériau</div><label>Couleur<input id="matColor" type="color"></label><label>Metalness<input id="metalness" type="range" min="0" max="1" step=".01"></label><label>Roughness<input id="roughness" type="range" min="0" max="1" step=".01"></label></div>
+   <div id="lightPanel" hidden><div class="prop-title">Lumière</div><label>Intensité<input id="lightIntensity" type="range" min="0" max="30" step=".1"></label><label>Couleur<input id="lightColor" type="color"></label></div>
+   <div class="inspector-actions"><button id="keyframeBtn" class="primary">+ Keyframe</button><button id="deleteBtn" class="danger">Supprimer</button></div>
+  </div>
+ </div>
 
-        <div class="prop-title">Échelle</div>
-        <div class="xyz">
-          <label>X<input id="sx" type="number" step="0.1"></label>
-          <label>Y<input id="sy" type="number" step="0.1"></label>
-          <label>Z<input id="sz" type="number" step="0.1"></label>
-        </div>
+ <div class="inspector-panel" id="inspect-world">
+  <div class="section-title">Monde</div>
+  <label>Fond<input id="worldColor" type="color" value="#101019"></label>
+  <label>Fog<input id="fogToggle" type="checkbox"></label>
+  <label>Densité fog<input id="fogDensity" type="range" min="0" max=".08" step=".002" value=".015"></label>
+  <label>Sol<input id="groundToggle" type="checkbox" checked></label>
+  <label>Couleur sol<input id="groundColor" type="color" value="#292834"></label>
+  <div class="prop-title">Lumières globales</div>
+  <label>Ambiante<input id="ambientPower" type="range" min="0" max="5" step=".1" value="1.8"></label>
+  <label>Soleil<input id="sunPower" type="range" min="0" max="8" step=".1" value="2.5"></label>
+ </div>
 
-        <div id="materialPanel">
-          <div class="prop-title">Matériau</div>
-          <label>Couleur<input id="matColor" type="color"></label>
-          <label>Metalness<input id="metalness" type="range" min="0" max="1" step="0.01"></label>
-          <label>Roughness<input id="roughness" type="range" min="0" max="1" step="0.01"></label>
-        </div>
+ <div class="inspector-panel" id="inspect-settings">
+  <div class="section-title">Accessibilité</div>
+  <label>Contraste élevé<input id="highContrast" type="checkbox"></label>
+  <label>Réduire animations UI<input id="reduceMotion" type="checkbox"></label>
+  <label>Échelle UI<input id="uiScale" type="range" min=".85" max="1.25" step=".05" value="1"></label>
+  <div class="section-title settings-title">Raccourcis</div>
+  <div id="keymapEditor" class="keymap"></div>
+  <button id="resetKeys" class="wide">Rétablir les touches</button>
+ </div>
+</aside>
 
-        <div id="lightPanel" hidden>
-          <div class="prop-title">Lumière</div>
-          <label>Intensité<input id="lightIntensity" type="range" min="0" max="20" step="0.1"></label>
-        </div>
-
-        <div class="inspector-actions">
-          <button id="keyframeBtn" class="primary">+ Keyframe</button>
-          <button id="deleteBtn" class="danger">Supprimer</button>
-        </div>
-      </div>
-    </aside>
-
-    <section class="timeline panel">
-      <div class="timeline-controls">
-        <button id="playBtn">▶</button>
-        <button id="stopBtn">■</button>
-        <span id="timeLabel">0.00s</span>
-        <label>Durée <input id="durationInput" type="number" value="10" min="1" max="120" step="1"> s</label>
-      </div>
-      <input id="timeRange" type="range" min="0" max="10" value="0" step="0.01">
-      <div id="keyframeTrack" class="keyframe-track"></div>
-    </section>
-  </main>
-
-  <div id="toast" class="toast"></div>
-  <script type="module" src="blenderfied.js"></script>
-</body>
-</html>
+<section class="timeline panel">
+ <div class="timeline-controls"><button id="playBtn">▶</button><button id="stopBtn">■</button><span id="timeLabel">0.00s</span><span id="selectedTrack">Aucun objet</span><label>Durée <input id="durationInput" type="number" value="10" min="1" max="120" step="1"> s</label></div>
+ <input id="timeRange" type="range" min="0" max="10" value="0" step=".01"><div id="keyframeTrack" class="keyframe-track"></div>
+</section>
+</main>
+<div id="toast" class="toast"></div>
+<script type="module" src="blenderfied.js"></script>
+</body></html>
