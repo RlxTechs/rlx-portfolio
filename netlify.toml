@@ -25,3 +25,8 @@
   from = "/blenderfied"
   to = "/blenderfied.html"
   status = 200
+
+
+[[edge_functions]]
+  function = "analytics"
+  path = "/api/analytics"
