@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#090912">
+  <title>BlenderFied Studio — RLX</title>
+  <link rel="stylesheet" href="blenderfied.css">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="logo">B</span><div><b>BlenderFied</b><small>RLX Studio · MVP</small></div></div>
+    <div class="top-actions">
+      <button id="newProject">Nouveau</button>
+      <button id="saveProject">Sauvegarder</button>
+      <label class="button">Ouvrir<input id="openProject" type="file" accept=".json,application/json" hidden></label>
+      <button id="exportGlb" class="primary">Exporter GLB</button>
+      <a href="index.html#shop" class="button">RLX Shop</a>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <aside class="left-panel panel">
+      <section>
+        <div class="section-title">Ajouter</div>
+        <div class="asset-grid">
+          <button data-add="cube">Cube</button>
+          <button data-add="sphere">Sphère</button>
+          <button data-add="cylinder">Cylindre</button>
+          <button data-add="plane">Plan</button>
+          <button data-add="light">Lumière</button>
+          <button data-add="camera">Caméra</button>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-title">Importer</div>
+        <label class="dropzone" id="dropzone">
+          <b>GLB · GLTF · FBX · OBJ</b>
+          <span>Glisse un modèle ici ou clique</span>
+          <input id="modelInput" type="file" accept=".glb,.gltf,.fbx,.obj" hidden>
+        </label>
+      </section>
+
+      <section class="scene-section">
+        <div class="section-title row"><span>Scène</span><button id="duplicateBtn" title="Dupliquer">⧉</button></div>
+        <div id="sceneTree" class="scene-tree"></div>
+      </section>
+    </aside>
+
+    <section class="center">
+      <div class="viewport-toolbar">
+        <div class="tool-group">
+          <button data-mode="translate" class="active" title="Déplacer (G)">Déplacer</button>
+          <button data-mode="rotate" title="Rotation (R)">Rotation</button>
+          <button data-mode="scale" title="Échelle (S)">Échelle</button>
+        </div>
+        <div class="tool-group">
+          <button id="toggleGrid" class="active">Grille</button>
+          <button id="toggleSnap">Snap 0.5</button>
+          <button id="focusBtn">Cadrer (F)</button>
+        </div>
+        <div class="tool-group">
+          <button data-view="front">Face</button>
+          <button data-view="side">Côté</button>
+          <button data-view="top">Dessus</button>
+        </div>
+      </div>
+      <div id="viewport"></div>
+      <div class="viewport-hint">G déplacer · R rotation · S échelle · Suppr supprimer · Ctrl+D dupliquer · F cadrer</div>
+    </section>
+
+    <aside class="right-panel panel">
+      <div class="section-title">Inspecteur</div>
+      <div id="emptyInspector" class="empty">Sélectionne un objet.</div>
+      <div id="inspector" hidden>
+        <label>Nom<input id="objName" type="text"></label>
+
+        <div class="prop-title">Position</div>
+        <div class="xyz">
+          <label>X<input id="px" type="number" step="0.1"></label>
+          <label>Y<input id="py" type="number" step="0.1"></label>
+          <label>Z<input id="pz" type="number" step="0.1"></label>
+        </div>
+
+        <div class="prop-title">Rotation °</div>
+        <div class="xyz">
+          <label>X<input id="rx" type="number" step="1"></label>
+          <label>Y<input id="ry" type="number" step="1"></label>
+          <label>Z<input id="rz" type="number" step="1"></label>
+        </div>
+
+        <div class="prop-title">Échelle</div>
+        <div class="xyz">
+          <label>X<input id="sx" type="number" step="0.1"></label>
+          <label>Y<input id="sy" type="number" step="0.1"></label>
+          <label>Z<input id="sz" type="number" step="0.1"></label>
+        </div>
+
+        <div id="materialPanel">
+          <div class="prop-title">Matériau</div>
+          <label>Couleur<input id="matColor" type="color"></label>
+          <label>Metalness<input id="metalness" type="range" min="0" max="1" step="0.01"></label>
+          <label>Roughness<input id="roughness" type="range" min="0" max="1" step="0.01"></label>
+        </div>
+
+        <div id="lightPanel" hidden>
+          <div class="prop-title">Lumière</div>
+          <label>Intensité<input id="lightIntensity" type="range" min="0" max="20" step="0.1"></label>
+        </div>
+
+        <div class="inspector-actions">
+          <button id="keyframeBtn" class="primary">+ Keyframe</button>
+          <button id="deleteBtn" class="danger">Supprimer</button>
+        </div>
+      </div>
+    </aside>
+
+    <section class="timeline panel">
+      <div class="timeline-controls">
+        <button id="playBtn">▶</button>
+        <button id="stopBtn">■</button>
+        <span id="timeLabel">0.00s</span>
+        <label>Durée <input id="durationInput" type="number" value="10" min="1" max="120" step="1"> s</label>
+      </div>
+      <input id="timeRange" type="range" min="0" max="10" value="0" step="0.01">
+      <div id="keyframeTrack" class="keyframe-track"></div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast"></div>
+  <script type="module" src="blenderfied.js"></script>
+</body>
+</html>
