@@ -2,7 +2,7 @@ const URL='https://uwfyfuoiksjgyxoovxfn.supabase.co';
 const KEY='sb_publishable_f4RpmT2AsQToBtiBiI6hBg_kqSZbwCj';
 const ADMIN_EMAIL='bossedemardochee@gmail.com';
 const sb=window.supabase.createClient(URL,KEY);
-const state={reviews:[],orders:[],visits:[],messages:[],donations:[],downloads:[],products:[],erp:[],audit:[]};
+const state={reviews:[],orders:[],visits:[],messages:[],donations:[],downloads:[],products:[],erp:[],audit:[],analytics:[]};
 const $=id=>document.getElementById(id), esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove('show'),2200)}
 function fmt(d){return d?new Date(d).toLocaleString('fr-FR'):'—'}
@@ -31,25 +31,26 @@ async function fetchJsonTable(name,limit=200){
 async function refreshAll(){
  setSync('Synchronisation…');
  try{
-   const [reviews,orders,visits,messages,donations,downloads,products,erp,audit]=await Promise.all([
+   const [reviews,orders,messages,donations,products,erp,audit,analytics]=await Promise.all([
      fetchTable('reviews'),
      fetchTable('orders'),
-     fetchTable('site_visits',300),
      fetchTable('contact_messages'),
      fetchTable('donations'),
-     fetchTable('download_events',300),
      fetchJsonTable('products'),
      fetchJsonTable('erp_state'),
-     fetchTable('audit_events',300)
+     fetchTable('audit_events',300),
+     fetchTable('analytics_events',2000)
    ]);
-   Object.assign(state,{reviews,orders,visits,messages,donations,downloads,products,erp,audit});
+   const visits=analytics.filter(x=>x.event_type==='page_view');
+   const downloads=analytics.filter(x=>x.event_type==='download');
+   Object.assign(state,{reviews,orders,visits,messages,donations,downloads,products,erp,audit,analytics});
    renderAll();$('lastRefresh').textContent='Mis à jour '+new Date().toLocaleTimeString('fr-FR');setSync('À jour');
  }catch(e){console.error(e);setSync('Erreur');toast(e.message||'Accès aux données refusé')}
 }
 function renderAll(){
  const pending=state.reviews.filter(x=>!x.approved).length;
  $('statVisits').textContent=state.visits.length;$('statReviews').textContent=state.reviews.length;$('statPending').textContent=pending;$('statOrders').textContent=state.orders.length;$('statMessages').textContent=state.messages.length;$('statDonations').textContent=state.donations.length;$('statProducts').textContent=state.products.length;$('statErp').textContent=state.erp.length;$('pendingBadge').textContent=pending||'';$('productsBadge').textContent=state.products.length||'';$('erpBadge').textContent=state.erp.length||'';
- renderReviews();renderOrders();renderVisits();renderMessages();renderDonations();renderDownloads();renderProducts();renderErp();renderAudit();renderRecent();
+ renderAnalytics();renderReviews();renderOrders();renderVisits();renderMessages();renderDonations();renderDownloads();renderProducts();renderErp();renderAudit();renderRecent();
 }
 function renderRecent(){
  const all=[
@@ -77,7 +78,10 @@ function renderOrders(){
 }
 $('orderSearch').oninput=renderOrders;
 function renderVisits(){
- $('visitsList').innerHTML=table(['Date','Page','Langue','Écran','Session'],state.visits.map(x=>[fmt(x.created_at),esc(x.path),esc(x.locale),x.screen_width||'—',esc((x.session_id||'').slice(0,10))]));
+ $('visitsList').innerHTML=table(['Date','Page','Pays','Ville','Appareil','Navigateur','OS','Écran','Session'],state.visits.map(x=>[
+   fmt(x.created_at),esc(x.path),esc(x.country_name||x.country_code||'—'),esc(x.city||'—'),esc(x.device_type||'—'),esc(x.browser||'—'),esc(x.os||'—'),
+   x.screen_width&&x.screen_height?x.screen_width+'×'+x.screen_height:'—',esc((x.session_id||'').slice(0,10))
+ ]));
 }
 function renderMessages(){
  $('messagesList').innerHTML=state.messages.map(x=>'<article class="card"><div class="card-head"><div><b>'+esc(x.display_name)+'</b><div class="meta">'+esc(x.email)+' · '+fmt(x.created_at)+'</div></div><span class="pill '+(x.status==='new'?'warn':'')+'">'+esc(x.status)+'</span></div><b>'+esc(x.subject)+'</b><div>'+esc(x.message)+'</div><div class="card-actions"><select data-message-status="'+x.id+'">'+['new','read','archived'].map(s=>'<option '+(s===x.status?'selected':'')+'>'+s+'</option>').join('')+'</select><button class="danger" data-message-delete="'+x.id+'">Supprimer</button></div></article>').join('')||'<div class="empty">Aucun message.</div>';
@@ -89,7 +93,64 @@ function renderDonations(){
  document.querySelectorAll('[data-donation-status]').forEach(s=>s.onchange=()=>updateStatus('donations',s.dataset.donationStatus,s.value));
  document.querySelectorAll('[data-donation-delete]').forEach(b=>b.onclick=()=>removeRow('donations',b.dataset.donationDelete,'ce don'));
 }
-function renderDownloads(){$('downloadsList').innerHTML=table(['Date','Asset','Session'],state.downloads.map(x=>[fmt(x.created_at),esc(x.asset_slug),esc((x.session_id||'').slice(0,14))]))}
+function renderDownloads(){$('downloadsList').innerHTML=table(['Date','Fichier','Pays','Ville','Appareil','Navigateur','OS','Page','Session'],state.downloads.map(x=>[
+ fmt(x.created_at),esc(x.asset_slug||'—'),esc(x.country_name||x.country_code||'—'),esc(x.city||'—'),esc(x.device_type||'—'),esc(x.browser||'—'),esc(x.os||'—'),esc(x.path||'—'),esc((x.session_id||'').slice(0,14))
+]))}
+
+
+function analyticsFiltered(){
+ const v=$('analyticsRange')?.value||'7';
+ if(v==='all')return [...state.analytics];
+ const days=Number(v)||7,cut=Date.now()-days*86400000;
+ return state.analytics.filter(x=>new Date(x.created_at).getTime()>=cut);
+}
+function countBy(rows,keyFn){
+ const m=new Map();
+ for(const row of rows){const k=keyFn(row)||'Inconnu';m.set(k,(m.get(k)||0)+1)}
+ return [...m.entries()].sort((a,b)=>b[1]-a[1]);
+}
+function bars(rows,maxRows=8){
+ if(!rows.length)return '<div class="empty">Pas encore de données.</div>';
+ const max=Math.max(...rows.map(x=>x[1]),1);
+ return '<div class="bar-list">'+rows.slice(0,maxRows).map(([label,count])=>'<div class="bar-row"><div class="bar-label"><span>'+esc(label)+'</span><b>'+count+'</b></div><div class="bar-track"><i style="width:'+Math.max(4,count/max*100)+'%"></i></div></div>').join('')+'</div>';
+}
+function renderAnalytics(){
+ const rows=analyticsFiltered(),page=rows.filter(x=>x.event_type==='page_view'),downloads=rows.filter(x=>x.event_type==='download'),productClicks=rows.filter(x=>x.event_type==='product_click');
+ const sessions=new Set(rows.map(x=>x.session_id).filter(Boolean));
+ const countries=new Set(rows.map(x=>x.country_code||x.country_name).filter(Boolean));
+ const mobile=rows.filter(x=>x.device_type==='Mobile'||x.device_type==='Tablette').length;
+ $('aPageViews').textContent=page.length;
+ $('aSessions').textContent=sessions.size;
+ $('aDownloads').textContent=downloads.length;
+ $('aCountries').textContent=countries.size;
+ $('aMobile').textContent=rows.length?Math.round(mobile/rows.length*100)+'%':'0%';
+ $('aProductClicks').textContent=productClicks.length;
+ $('analyticsCount').textContent=rows.length+' événements';
+ $('topCountries').innerHTML=bars(countBy(rows,x=>x.country_name||x.country_code||'Inconnu'));
+ $('topDevices').innerHTML=bars(countBy(rows,x=>x.device_type||'Inconnu'));
+ $('topBrowsers').innerHTML=bars(countBy(rows,x=>x.browser||'Inconnu'));
+ $('topOs').innerHTML=bars(countBy(rows,x=>x.os||'Inconnu'));
+ $('topPages').innerHTML=bars(countBy(page,x=>x.path||'/'));
+ $('topDownloads').innerHTML=bars(countBy(downloads,x=>x.asset_slug||'Fichier inconnu'));
+ const recent=[...rows].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,80);
+ $('analyticsRecent').innerHTML=table(['Date','Événement','Page / fichier','Pays','Ville','Appareil','Navigateur','OS','Session'],recent.map(x=>[
+   fmt(x.created_at),esc(x.event_type),esc(x.asset_slug||x.path||'—'),esc(x.country_name||x.country_code||'—'),esc(x.city||'—'),esc(x.device_type||'—'),esc(x.browser||'—'),esc(x.os||'—'),esc((x.session_id||'').slice(0,12))
+ ]));
+}
+$('analyticsRange').onchange=renderAnalytics;
+$('exportAnalyticsBtn').onclick=()=>{
+ const rows=analyticsFiltered();
+ const cols=['created_at','event_type','path','asset_slug','country_code','country_name','region','city','device_type','browser','os','platform','locale','timezone','screen_width','screen_height','viewport_width','viewport_height','session_id'];
+ const q=v=>'"'+String(v??'').replaceAll('"','""')+'"';
+ const csv=[cols.join(','),...rows.map(r=>cols.map(k=>q(r[k])).join(','))].join('\r\n');
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='RLX_Analytics_'+new Date().toISOString().slice(0,10)+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)
+};
+
+let deferredInstallPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;$('installAppBtn').hidden=false});
+$('installAppBtn').onclick=async()=>{if(!deferredInstallPrompt)return toast('Utilise le menu du navigateur → Installer RLX Control');deferredInstallPrompt.prompt();await deferredInstallPrompt.userChoice;deferredInstallPrompt=null;$('installAppBtn').hidden=true};
+window.addEventListener('appinstalled',()=>{$('installAppBtn').hidden=true;toast('RLX Control installé')});
+if('serviceWorker' in navigator)navigator.serviceWorker.register('/control-sw.js').catch(()=>{});
 
 function safeJson(value){try{return JSON.stringify(value??{},null,2)}catch{return '{}'}}
 function parseEditorJson(text,label){
