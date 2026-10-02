@@ -21,7 +21,7 @@
     <a class="brand" href="#top" aria-label="Accueil RLX"><span class="brand-orb">R</span><span>RLX</span></a>
     <button id="menuBtn" class="menu-btn" aria-label="Menu">☰</button>
     <nav id="mainNav">
-      <a href="#projects">Projets</a><a href="#services">Services</a><a href="#software">Logiciels</a><a href="#games">Jeux</a><a href="#trainings">Formations</a><a href="#lamarshop">LamarShop</a><a href="#watch">Vidéos</a><a href="#contest">Concours</a><a href="#freelance">Freelance</a><a href="#skills">Stack</a><a href="#reviews">Avis</a>
+      <a href="#projects">Projets</a><a href="#services">Services</a><a href="#software">Logiciels</a><a href="#games">Jeux</a><a href="#trainings">Formations</a><a href="#lamarshop">LamarShop</a><a href="#watch">Vidéos</a><a href="#contest">Concours</a><a href="#freelance">Freelance</a><a href="#skills">Stack</a><a href="#reviews">Avis</a><a href="#account">Compte</a>
     </nav>
     <button class="pill" id="accountBtn">Compte</button>
   </header>
@@ -36,14 +36,21 @@
         <div class="microstats"><div><b>Compte RLX</b><span>Email/code + Google</span></div><div><b>Promos opt-in</b><span>Offres ciblées</span></div><div><b>Analytics privés</b><span>Admin seulement</span></div></div>
       </div>
 
-      <div class="hero-art reveal">
-        <div class="blister-card creator-card">
-          <div class="blister-title">RLX CREATOR KIT</div>
-          <div class="creator-viewer-shell" id="creatorDrop"><div id="creatorViewer" class="creator-viewer"></div><div id="creatorEmpty" class="creator-empty"><b>Ton skin 3D ici</b><span>GLB / GLTF riggé</span></div><div class="creator-badge" id="creatorAnimStatus">Aucun skin chargé</div></div>
-          <div class="creator-actions"><label class="creator-upload">Charger un skin<input id="creatorSkinInput" type="file" accept=".glb,.gltf,model/gltf-binary,model/gltf+json" hidden></label><button type="button" id="creatorNextAnim">Animation suivante</button><button type="button" id="creatorResetView">Recentrer</button></div>
-          <p class="creator-note">Le skin choisi reste dans ce navigateur. Tu peux aussi publier un GLB dans GitHub pour le charger automatiquement depuis le cloud.</p>
-          <div class="kit-grid"><div class="kit-chip">3D</div><div class="kit-chip">RIG</div><div class="kit-chip">ANIM</div><div class="kit-chip">GLB</div></div>
-          <div class="blister-footer">CREATOR · RIG · ANIMATION</div>
+      <div class="hero-art creator-hero reveal">
+        <div class="creator-stage" id="creatorDrop">
+          <div class="creator-aura aura-a"></div><div class="creator-aura aura-b"></div>
+          <div class="creator-hud creator-hud-top"><span class="live-dot"></span><b>RLX AVATAR // LIVE</b><small>3D · RIG · ANIMATION</small></div>
+          <div id="creatorViewer" class="creator-viewer"></div>
+          <div id="creatorEmpty" class="creator-empty"><b>Avatar 3D en préparation</b><span>Le skin cloud apparaîtra ici automatiquement.</span></div>
+          <div class="creator-holo-floor"></div>
+          <div class="creator-hud creator-hud-bottom">
+            <span id="creatorAnimStatus">Recherche du skin cloud…</span>
+            <div class="creator-actions">
+              <label class="creator-upload">Changer le skin<input id="creatorSkinInput" type="file" accept=".glb,.gltf,model/gltf-binary,model/gltf+json" hidden></label>
+              <button type="button" id="creatorNextAnim">Animation</button>
+              <button type="button" id="creatorResetView">Recentrer</button>
+            </div>
+          </div>
         </div>
       </div>
     </section>
